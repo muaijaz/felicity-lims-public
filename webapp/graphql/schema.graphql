@@ -1,3 +1,7 @@
+directive @hasPermission on FIELD_DEFINITION
+
+directive @isAuthenticated on FIELD_DEFINITION
+
 input ARResultInputType {
   uid: String!
   result: String!
@@ -11,18 +15,861 @@ input ARSampleInputType {
   profiles: [String!]!
   analyses: [String!]!
   dateCollected: String!
+  dateReceived: String!
+}
+
+type AbxASTPanelCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxASTPanelEdge!]
+  items: [AbxASTPanelType!]
+  totalCount: Int!
+}
+
+type AbxASTPanelEdge {
+  cursor: String!
+  node: AbxASTPanelType!
+}
+
+input AbxASTPanelInputType {
+  name: String!
+  description: String = null
+  antibiotics: [String!]!
+  organisms: [String!]!
+  active: Boolean! = true
+}
+
+""""""
+union AbxASTPanelResponse = AbxASTPanelType | OperationError
+
+type AbxASTPanelType {
+  uid: String!
+  name: String!
+  description: String
+  organisms: [AbxOrganismType!]
+  antibiotics: [AbxAntibioticType!]
+  active: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+""""""
+union AbxASTResultResponse = AbxASTResultsType | OperationError
+
+type AbxASTResultType {
+  uid: String!
+  organismResultUid: String!
+  analysisResultUid: String!
+  analysisResult: AnalysisResultType
+  antibioticUid: String!
+  antibiotic: AbxAntibioticType
+  astMethodUid: String
+  astMethod: AbxTestMethodType
+  guidelineYearUid: String
+  guidelineYear: AbxGuidelineYearType
+  breakpointUid: String
+  breakpoint: AbxBreakpointTyp
+  astValue: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxASTResultUpdateInput {
+  uid: String!
+  astMethodUid: String = null
+  guidelineYearUid: String = null
+  astValue: String = null
+  reportable: Boolean = null
+  result: String = null
+}
+
+type AbxASTResultsType {
+  astResults: [AbxASTResultType!]!
+}
+
+input AbxASTResultsUpdateInput {
+  results: [AbxASTResultUpdateInput!]!
+}
+
+type AbxAntibioticCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxAntibioticEdge!]
+  items: [AbxAntibioticType!]
+  totalCount: Int!
+}
+
+type AbxAntibioticEdge {
+  cursor: String!
+  node: AbxAntibioticType!
+}
+
+type AbxAntibioticGuidelineType {
+  uid: String!
+  antibioticUid: String!
+  antibiotic: AbxAntibioticType
+  guidelineUid: String!
+  guideline: AbxGuidelineType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxAntibioticInputType {
+  name: String!
+  guidelines: [String!]!
+  whonetAbxCode: String = null
+  whoCode: String = null
+  dinCode: String = null
+  jacCode: String = null
+  eucastCode: String = null
+  userCode: String = null
+  abxNumber: String = null
+  potency: String = null
+  atcCode: String = null
+  class_: String = null
+  subclass: String = null
+  profClass: String = null
+  ciaCategory: String = null
+  clsiOrder: String = null
+  eucastOrder: String = null
+  human: Boolean = null
+  veterinary: Boolean = null
+  animalGp: String = null
+  loinccomp: String = null
+  loincgen: String = null
+  loincdisk: String = null
+  loincmic: String = null
+  loincetest: String = null
+  loincslow: String = null
+  loincafb: String = null
+  loincsbt: String = null
+  loincmlc: String = null
+  comments: String = null
+}
+
+""""""
+union AbxAntibioticResponse = AbxAntibioticType | OperationError
+
+type AbxAntibioticType {
+  uid: String!
+  name: String!
+  whonetAbxCode: String
+  whoCode: String
+  dinCode: String
+  jacCode: String
+  eucastCode: String
+  userCode: String
+  abxNumber: String
+  potency: String
+  atcCode: String
+  class_: String
+  subclass: String
+  profClass: String
+  ciaCategory: String
+  clsiOrder: String
+  eucastOrder: String
+  human: Boolean
+  veterinary: Boolean
+  animalGp: String
+  loinccomp: String
+  loincgen: String
+  loincdisk: String
+  loincmic: String
+  loincetest: String
+  loincslow: String
+  loincafb: String
+  loincsbt: String
+  loincmlc: String
+  comments: String
+  guidelines: [AbxGuidelineType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxApplyAstPanelInput {
+  sampleUid: String!
+  panelUid: String!
+  organismResultUid: String!
+}
+
+input AbxBreakpointInputType {
+  guidelineUid: String!
+  year: Int = null
+  testMethod: String!
+  potency: String = null
+  organismCode: String!
+  organismCodeType: String!
+  breakpointTypeUid: String!
+  hostUid: String = null
+  siteOfInfectionUid: String = null
+  referenceTable: String = null
+  referenceSequence: String = null
+  whonetAbxCode: String = null
+  comments: String = null
+  r: String = null
+  i: String = null
+  sdd: String = null
+  s: String = null
+  ecvEcoff: String = null
+  ecvEcoffTentative: String = null
+}
+
+""""""
+union AbxBreakpointResponse = AbxBreakpointTyp | OperationError
+
+type AbxBreakpointTyp {
+  uid: String!
+  guidelineYearUid: String!
+  guidelineYear: AbxGuidelineYearType
+  testMethodUid: String!
+  testMethod: AbxTestMethodType
+  potency: String
+  organismCode: String!
+  organismCodeType: String!
+  breakpointTypeUid: String!
+  breakpointType: AbxBreakpointTypeTyp
+  hostUid: String
+  host: AbxHostType
+  siteOfInfectionUid: String
+  siteOfInfection: AbxSiteOfInfectionType
+  referenceTable: String
+  referenceSequence: String
+  whonetAbxCode: String
+  comments: String
+  r: String
+  i: String
+  sdd: String
+  s: String
+  ecvEcoff: String
+  ecvEcoffTentative: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxBreakpointTypCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxBreakpointTypEdge!]
+  items: [AbxBreakpointTyp!]
+  totalCount: Int!
+}
+
+type AbxBreakpointTypEdge {
+  cursor: String!
+  node: AbxBreakpointTyp!
+}
+
+input AbxBreakpointTypeInputType {
+  name: String!
+  description: String = null
+}
+
+""""""
+union AbxBreakpointTypeResponse = AbxBreakpointTypeTyp | OperationError
+
+type AbxBreakpointTypeTyp {
+  uid: String!
+  name: String!
+  description: String
+  laboratoryUid: String
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxClassInputType {
+  name: String!
+  phylumUid: String = null
+}
+
+""""""
+union AbxClassResponse = AbxClassType | OperationError
+
+type AbxClassType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  phylumUid: String
+  phylum: AbxPhylumType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxExpResPhenotypeCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxExpResPhenotypeEdge!]
+  items: [AbxExpResPhenotypeType!]
+  totalCount: Int!
+}
+
+type AbxExpResPhenotypeEdge {
+  cursor: String!
+  node: AbxExpResPhenotypeType!
+}
+
+input AbxExpResPhenotypeInputType {
+  guidelineUid: String!
+  referenceTable: String!
+  organismCode: String!
+  organismCodeType: String!
+  exceptionOrganismCode: String!
+  exceptionOrganismCodeType: String!
+  abxCode: String!
+  abxCodeType: String!
+  antibioticExceptions: String!
+  comments: String = null
+}
+
+""""""
+union AbxExpResPhenotypeResponse = AbxExpResPhenotypeType | OperationError
+
+type AbxExpResPhenotypeType {
+  uid: String!
+  guidelineUid: String!
+  guideline: AbxGuidelineType
+  referenceTable: String
+  organismCode: String!
+  organismCodeType: String!
+  exceptionOrganismCode: String!
+  exceptionOrganismCodeType: String!
+  abxCode: String!
+  abxCodeType: String!
+  antibioticExceptions: String!
+  comments: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxExpertInterpretationRuleCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxExpertInterpretationRuleEdge!]
+  items: [AbxExpertInterpretationRuleType!]
+  totalCount: Int!
+}
+
+type AbxExpertInterpretationRuleEdge {
+  cursor: String!
+  node: AbxExpertInterpretationRuleType!
+}
+
+input AbxExpertInterpretationRuleInputType {
+  ruleCode: String!
+  description: String = null
+  organismCode: String!
+  organismCodeType: String!
+  ruleCriteria: String!
+  affectedAntibiotics: String!
+  antibioticExceptions: String!
+}
+
+""""""
+union AbxExpertInterpretationRuleResponse = AbxExpertInterpretationRuleType | OperationError
+
+type AbxExpertInterpretationRuleType {
+  uid: String!
+  ruleCode: String!
+  description: String
+  organismCode: String!
+  organismCodeType: String!
+  ruleCriteria: String!
+  affectedAntibiotics: String!
+  antibioticExceptions: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxFamilyInputType {
+  name: String!
+  orderUid: String = null
+}
+
+""""""
+union AbxFamilyResponse = AbxFamilyType | OperationError
+
+type AbxFamilyType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  orderUid: String
+  order: AbxOrderType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxGenusInputType {
+  name: String!
+  familyUid: String = null
+}
+
+""""""
+union AbxGenusResponse = AbxGenusType | OperationError
+
+type AbxGenusType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  familyUid: String
+  family: AbxFamilyType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxGuidelineInputType {
+  name: String!
+  code: String = ""
+  description: String = ""
+}
+
+""""""
+union AbxGuidelineResponse = AbxGuidelineType | OperationError
+
+type AbxGuidelineType {
+  uid: String!
+  name: String!
+  code: String
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxGuidelineYearType {
+  uid: String!
+  guidelineUid: String!
+  guideline: AbxGuidelineType
+  year: Int!
+  code: String!
+}
+
+input AbxHostInputType {
+  name: String!
+  description: String = null
+}
+
+""""""
+union AbxHostResponse = AbxHostType | OperationError
+
+type AbxHostType {
+  uid: String!
+  name: String!
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxKingdomInputType {
+  name: String!
+}
+
+""""""
+union AbxKingdomResponse = AbxKingdomType | OperationError
+
+type AbxKingdomType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxMediumInputType {
+  name: String!
+  description: String = null
+}
+
+""""""
+union AbxMediumResponse = AbxMediumType | OperationError
+
+type AbxMediumType {
+  uid: String!
+  name: String!
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxOrderInputType {
+  name: String!
+  classUid: String = null
+}
+
+""""""
+union AbxOrderResponse = AbxOrderType | OperationError
+
+type AbxOrderType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  classUid: String
+  class_: AbxClassType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxOrganismCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxOrganismEdge!]
+  items: [AbxOrganismType!]
+  totalCount: Int!
+}
+
+type AbxOrganismEdge {
+  cursor: String!
+  node: AbxOrganismType!
+}
+
+input AbxOrganismInputType {
+  name: String!
+  whonetOrgCode: String = null
+  replacedBy: String = null
+  taxonomicStatus: String = null
+  common: String = null
+  organismType: String = null
+  anaerobe: Boolean = null
+  morphology: String = null
+  kingdomUid: String = null
+  phylumUid: String = null
+  classUid: String = null
+  orderUid: String = null
+  familyUid: String = null
+  genusUid: String = null
+  comments: String = null
+}
+
+""""""
+union AbxOrganismResponse = AbxOrganismType | OperationError
+
+type AbxOrganismResultType {
+  uid: String!
+  analysisResultUid: String!
+  organismUid: String
+  organism: AbxOrganismType
+  isolateNumber: Int
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxOrganismSerotypeCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxOrganismSerotypeEdge!]
+  items: [AbxOrganismSerotypeType!]
+  totalCount: Int!
+}
+
+type AbxOrganismSerotypeEdge {
+  cursor: String!
+  node: AbxOrganismSerotypeType!
+}
+
+input AbxOrganismSerotypeInputType {
+  organismUid: String!
+  serotype: String!
+  serogroup: String = null
+  subspecies: String = null
+  oAntigens: String = null
+  hPhase1: String = null
+  hPhase2: String = null
+  x997Check: String = null
+  fate: String = null
+}
+
+""""""
+union AbxOrganismSerotypeResponse = AbxOrganismSerotypeType | OperationError
+
+type AbxOrganismSerotypeType {
+  uid: String!
+  organismUid: String!
+  organism: AbxOrganismType
+  serotype: String!
+  serogroup: String
+  subspecies: String
+  oAntigens: String
+  hPhase1: String
+  hPhase2: String
+  x997Check: String
+  fate: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxOrganismType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  whonetOrgCode: String
+  replacedBy: String
+  taxonomicStatus: String
+  common: String
+  organismType: String
+  anaerobe: Boolean
+  morphology: String
+  subkingdomCode: String
+  familyCode: String
+  genusGroup: String
+  genusCode: String
+  speciesGroup: String
+  serovarGroup: String
+  msfGrpClin: String
+  sctCode: String
+  sctText: String
+  gbifTaxonId: String
+  gbifDatasetId: String
+  gbifTaxonomicStatus: String
+  kingdomUid: String
+  kingdom: AbxKingdomType
+  phylumUid: String
+  phylum: AbxPhylumType
+  classUid: String
+  class_: AbxClassType
+  orderUid: String
+  order: AbxOrderType
+  familyUid: String
+  family: AbxFamilyType
+  genusUid: String
+  genus: AbxGenusType
+  comments: String
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxPhylumInputType {
+  name: String!
+  kingdomUid: String = null
+}
+
+""""""
+union AbxPhylumResponse = AbxPhylumType | OperationError
+
+type AbxPhylumType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  kingdomUid: String
+  kingdom: AbxKingdomType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type AbxQCRangeCursorPage {
+  pageInfo: PageInfo!
+  edges: [AbxQCRangeEdge!]
+  items: [AbxQCRangeType!]
+  totalCount: Int!
+}
+
+type AbxQCRangeEdge {
+  cursor: String!
+  node: AbxQCRangeType!
+}
+
+input AbxQCRangeInputType {
+  guidelineUid: String!
+  year: Int!
+  strain: String!
+  referenceTable: String!
+  whonetOrgCode: String!
+  antibiotic: String!
+  abxTest: String!
+  whonetAbxCode: String!
+  method: String!
+  mediumUid: String = null
+  minimum: String = null
+  maximum: String = null
+}
+
+""""""
+union AbxQCRangeResponse = AbxQCRangeType | OperationError
+
+type AbxQCRangeType {
+  uid: String!
+  guidelineUid: String!
+  guideline: AbxGuidelineType
+  year: Int!
+  strain: String!
+  referenceTable: String!
+  whonetOrgCode: String!
+  antibiotic: String!
+  abxTest: String!
+  whonetAbxCode: String!
+  method: String!
+  mediumUid: String
+  medium: AbxMediumType
+  minimum: String
+  maximum: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxSiteOfInfectionInputType {
+  name: String!
+  description: String = null
+}
+
+""""""
+union AbxSiteOfInfectionResponse = AbxSiteOfInfectionType | OperationError
+
+type AbxSiteOfInfectionType {
+  uid: String!
+  name: String!
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input AbxTestMethodInputType {
+  name: String!
+  description: String = null
+}
+
+""""""
+union AbxTestMethodResponse = AbxTestMethodType | OperationError
+
+type AbxTestMethodType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  description: String
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
 }
 
 type ActivityFeedType {
   uid: String!
   name: String!
   subscribers: [UserType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 type ActivityProcessType {
   uid: String!
   objectType: String!
   status: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 type ActivityStreamType {
@@ -30,11 +877,13 @@ type ActivityStreamType {
   feeds: [ActivityFeedType!]
   actorUid: String
   verb: String
-  actionObjectType: String
+  actionObjectType: NotificationObjectType
   actionObjectUid: String
   targetUid: String
   target: String
   viewers: [UserType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -43,6 +892,26 @@ type ActivityStreamType {
   updatedBy: UserType
   actor: UserType!
   actionObject: WorkSheetTypeSampleTypeAnalysisResultTypeReportMetaTypeUnknownObjectType!
+}
+
+input AllergyInput {
+  allergen: String!
+  allergenType: String = null
+  severity: String = null
+  reaction: String = null
+  onsetDate: String = null
+  verified: Boolean! = false
+  notes: String = null
+}
+
+type AllergyType {
+  allergen: String!
+  allergenType: String
+  severity: String
+  reaction: String
+  onsetDate: String
+  verified: Boolean!
+  notes: String
 }
 
 input AnalysisCategoryInputType {
@@ -62,6 +931,8 @@ type AnalysisCategoryType {
   department: DepartmentType
   description: String
   active: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -86,6 +957,8 @@ type AnalysisCorrectionFactorType {
   analysisUid: String!
   instrumentUid: String!
   methodUid: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -119,6 +992,8 @@ type AnalysisDetectionLimitType {
   analysisUid: String!
   instrumentUid: String!
   methodUid: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -144,6 +1019,8 @@ type AnalysisDiscountType {
   valuePercent: Float!
   valueAmount: Float!
   isActive: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -169,7 +1046,7 @@ input AnalysisInputType {
   unitUid: String = null
   internalUse: Boolean = false
   tatLengthMinutes: Int!
-  precision: Int!
+  precision: Int = null
   requiredVerifications: Int! = 1
   selfVerification: Boolean = false
   active: Boolean = true
@@ -191,6 +1068,8 @@ type AnalysisInterimType {
   value: String!
   analysisUid: String!
   instrumentUid: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -219,6 +1098,8 @@ type AnalysisMappingType {
   name: String
   description: String
   code: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -236,6 +1117,8 @@ type AnalysisPriceType {
   analysis: AnalysisType!
   isActive: Boolean!
   amount: Float!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -263,7 +1146,7 @@ input AnalysisRequestInputType {
   patientUid: String!
   clientUid: String!
   clientContactUid: String!
-  clinicalData: String = ""
+  clinicalData: ClinicalDataInputType = null
   samples: [ARSampleInputType!]!
   clientRequestId: String = null
   internalUse: Boolean = false
@@ -280,15 +1163,23 @@ type AnalysisRequestType {
   clientUid: String!
   requestId: String!
   clientRequestId: String!
+  clientContactUid: String
+  clientContact: ClientContactType
+  clinicalData: [ClinicalDataType!]
   internalUse: Boolean!
+  isBilled: Boolean!
+  isLocked: Boolean!
   metadataSnapshot: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
-  client: ClientType!
+  samples: [SampleType!]!
+  client: ClientType
 }
 
 type AnalysisRequestWithSamples {
@@ -298,16 +1189,23 @@ type AnalysisRequestWithSamples {
   clientUid: String!
   requestId: String!
   clientRequestId: String!
+  clientContactUid: String
+  clientContact: ClientContactType
+  clinicalData: [ClinicalDataType!]
   internalUse: Boolean!
+  isBilled: Boolean!
+  isLocked: Boolean!
   metadataSnapshot: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
-  client: ClientType!
   samples: [SampleType!]
+  client: ClientType
 }
 
 type AnalysisResultCursorPage {
@@ -326,7 +1224,7 @@ type AnalysisResultEdge {
 union AnalysisResultResponse = ResultListingType | OperationError
 
 """Union of possible outcomes when submitting/verifying results"""
-union AnalysisResultSubmitResponse = OperationSuccess | OperationError
+union AnalysisResultSubmitResponse = ResultOperationType | OperationError
 
 type AnalysisResultType {
   uid: String!
@@ -366,10 +1264,11 @@ type AnalysisResultType {
   updatedBy: UserType
   updatedAt: String
   metadataSnapshot: JSONScalar
+  laboratoryUid: String
   worksheetId: String
   laboratoryInstrument: LaboratoryInstrumentType
-  analysis: AnalysisType
   method: MethodType
+  analysis: AnalysisType
 }
 
 input AnalysisSpecificationInput {
@@ -409,6 +1308,8 @@ type AnalysisSpecificationType {
   methodUid: String
   unitUid: String
   unit: UnitType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -434,6 +1335,8 @@ type AnalysisTemplateType {
   departmentUid: String
   department: DepartmentType
   analyses: [AnalysisType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -462,6 +1365,7 @@ type AnalysisType {
   resultOptions: [ResultOptionType!]
   instruments: [InstrumentType!]
   methods: [MethodType!]
+  profiles: [ProfileType!]
   resultType: String
   tatLengthMinutes: Int
   sortKey: Int
@@ -471,6 +1375,8 @@ type AnalysisType {
   hidden: Boolean
   internalUse: Boolean
   active: Boolean
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -499,6 +1405,8 @@ type AnalysisUncertaintyType {
   analysisUid: String!
   instrumentUid: String!
   methodUid: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -527,6 +1435,7 @@ type AnalysisWithProfiles {
   resultOptions: [ResultOptionType!]
   instruments: [InstrumentType!]
   methods: [MethodType!]
+  profiles: [ProfileType!]
   resultType: String
   tatLengthMinutes: Int
   sortKey: Int
@@ -536,13 +1445,14 @@ type AnalysisWithProfiles {
   hidden: Boolean
   internalUse: Boolean
   active: Boolean
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
-  profiles: [ProfileType!]
 }
 
 input ApplyVoucherInput {
@@ -559,6 +1469,9 @@ type AuditLogType {
   action: Int
   stateBefore: JSONScalar
   stateAfter: JSONScalar
+  extras: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -572,6 +1485,8 @@ type AuthenticatedData {
   token: String!
   refresh: String!
   tokenType: String!
+  laboratories: [LaboratoryType!]
+  activeLaboratory: LaboratoryType
 }
 
 """"""
@@ -615,12 +1530,32 @@ type CalibrationCertificateType {
   performedBy: String!
   approvedBy: String!
   remarks: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+}
+
+input ChronicConditionInput {
+  icd10Code: String!
+  title: String!
+  description: String = null
+  onsetDate: String = null
+  endDate: String = null
+  status: String! = "active"
+}
+
+type ChronicConditionType {
+  icd10Code: String!
+  title: String!
+  description: String
+  onsetDate: String
+  endDate: String
+  status: String!
 }
 
 input ClientContactInputType {
@@ -649,6 +1584,8 @@ type ClientContactType {
   consentSms: Boolean!
   clientUid: String!
   client: ClientType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   creatorName: String
   creatorUid: String
@@ -702,6 +1639,8 @@ type ClientType {
   consentSms: Boolean!
   internalUse: Boolean!
   active: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -709,6 +1648,97 @@ type ClientType {
   updatedBy: UserType
   updatedAt: String
   contacts: [ClientContactType!]
+}
+
+type ClinicalDataCodingType {
+  uid: String!
+  clinicalDataUid: String
+  codingStandardUid: String
+  code: String
+  name: String
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
+input ClinicalDataInputType {
+  symptoms: [String!] = null
+  symptomsRaw: String = ""
+  clinicalIndication: String = ""
+  pregnancyStatus: Boolean = false
+  breastFeeding: Boolean = false
+  vitals: JSON = null
+  treatmentNotes: String = ""
+  otherContext: JSON = null
+}
+
+type ClinicalDataType {
+  uid: String!
+  analysisRequestUid: String
+  symptoms: [String!]
+  symptomsRaw: String
+  clinicalIndication: String
+  pregnancyStatus: Boolean
+  breastFeeding: Boolean
+  vitals: JSONScalar
+  treatmentNotes: String
+  otherContext: JSONScalar
+  codings: [ClinicalDataCodingType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
+input ClinicalDiagnosisInput {
+  patientUid: String!
+  icd10Code: String!
+  icd10Description: String!
+  diagnosisDate: DateTime!
+  diagnosisType: String!
+  status: String! = "active"
+  analysisRequestUid: String = null
+  resolutionDate: DateTime = null
+  diagnosingProviderUid: String = null
+  notes: String = null
+  pointer: String = null
+}
+
+""""""
+union ClinicalDiagnosisResponse = ClinicalDiagnosisType | OperationError
+
+type ClinicalDiagnosisType {
+  uid: String!
+  patientUid: String!
+  analysisRequestUid: String
+  icd10Code: String!
+  icd10Description: String!
+  diagnosisDate: DateTime!
+  diagnosisType: String!
+  status: String!
+  resolutionDate: DateTime
+  diagnosingProviderUid: String
+  diagnosingProvider: UserType
+  notes: String
+  pointer: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
 }
 
 input CodingStandardInputType {
@@ -723,6 +1753,8 @@ type CodingStandardType {
   uid: String!
   name: String!
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -784,6 +1816,7 @@ type DepartmentType {
   name: String
   description: String
   code: String
+  laboratoryUid: String
   createdByUid: String
   createdAt: String
   updatedByUid: String
@@ -835,6 +1868,1321 @@ type DistrictType {
   updatedAt: String
 }
 
+type DocumentAuditCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentAuditEdge!]
+  items: [DocumentAuditType!]
+  totalCount: Int!
+}
+
+type DocumentAuditEdge {
+  cursor: String!
+  node: DocumentAuditType!
+}
+
+input DocumentAuditInputType {
+  """Document UID"""
+  document: String!
+
+  """Audit action"""
+  action: String!
+
+  """Action date"""
+  date: DateTime = null
+
+  """IP address"""
+  ipAddress: String = null
+}
+
+"""Response for document audit operations"""
+union DocumentAuditResponse = DocumentAuditType | OperationError
+
+type DocumentAuditType {
+  uid: String!
+  documentUid: String!
+  document: DocumentType!
+  action: String!
+  date: String!
+  userUid: String!
+  user: UserType!
+  ipAddress: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input DocumentCategoryInputType {
+  """Category name"""
+  name: String!
+}
+
+"""Response for document category operations"""
+union DocumentCategoryResponse = DocumentCategoryType | OperationError
+
+type DocumentCategoryType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input DocumentCategoryUpdateInputType {
+  """Category name"""
+  name: String = null
+  uid: String!
+}
+
+type DocumentCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentEdge!]
+  items: [DocumentType!]
+  totalCount: Int!
+}
+
+type DocumentEdge {
+  cursor: String!
+  node: DocumentType!
+}
+
+type DocumentFolderCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentFolderEdge!]
+  items: [DocumentFolderType!]
+  totalCount: Int!
+}
+
+type DocumentFolderEdge {
+  cursor: String!
+  node: DocumentFolderType!
+}
+
+input DocumentFolderInputType {
+  """Folder name"""
+  name: String!
+
+  """Folder description"""
+  description: String = null
+
+  """Parent folder UID"""
+  parentUid: String = null
+}
+
+"""Response for document folder operations"""
+union DocumentFolderResponse = DocumentFolderType | OperationError
+
+type DocumentFolderType {
+  uid: String!
+  name: String!
+  description: String
+  parentUid: String
+  parent: DocumentFolderType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  subfolders: [DocumentFolderType!]!
+  documents: [DocumentType!]!
+}
+
+input DocumentFolderUpdateInputType {
+  """Folder name"""
+  name: String = null
+
+  """Folder description"""
+  description: String = null
+
+  """Parent folder UID"""
+  parentUid: String = null
+  uid: String!
+}
+
+input DocumentInputType {
+  """Document name"""
+  name: String!
+
+  """Document subtitle"""
+  subtitle: String = null
+
+  """Document ID"""
+  documentId: String!
+
+  """Folder UID"""
+  folderUid: String = null
+
+  """Department UID"""
+  departmentUid: String = null
+
+  """Category UID"""
+  categoryUid: String = null
+
+  """Template UID"""
+  templateUid: String = null
+
+  """Tag UIDs"""
+  tags: [String!] = []
+
+  """Author UIDs"""
+  authors: [String!] = []
+
+  """Reader UIDs"""
+  readers: [String!] = []
+
+  """Initial version number"""
+  initialVersion: String = "1.0"
+}
+
+input DocumentRelationInputType {
+  """Source document UID"""
+  sourceDocument: String!
+
+  """Target document UID"""
+  targetDocument: String!
+
+  """Relation type"""
+  relationType: String!
+}
+
+"""Response for document relation operations"""
+union DocumentRelationResponse = DocumentType | OperationError
+
+"""Response for document operations"""
+union DocumentResponse = DocumentType | OperationError
+
+type DocumentReviewCycleCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentReviewCycleEdge!]
+  items: [DocumentReviewCycleType!]
+  totalCount: Int!
+}
+
+type DocumentReviewCycleEdge {
+  cursor: String!
+  node: DocumentReviewCycleType!
+}
+
+input DocumentReviewCycleInputType {
+  """Document UID"""
+  document: String!
+
+  """Start date"""
+  startDate: DateTime!
+
+  """End date"""
+  endDate: DateTime = null
+
+  """Review cycle status"""
+  status: String!
+
+  """Reviewers UIDs"""
+  reviewers: [String!] = []
+}
+
+"""Response for document review cycle operations"""
+union DocumentReviewCycleResponse = DocumentReviewCycleType | OperationError
+
+type DocumentReviewCycleType {
+  uid: String!
+  documentUid: String!
+  document: DocumentType!
+  startDate: String!
+  endDate: String
+  initiatedByUid: String!
+  initiatedBy: UserType!
+  status: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  steps: [DocumentReviewStepType!]!
+}
+
+input DocumentReviewCycleUpdateInputType {
+  """Document UID"""
+  document: String = null
+
+  """Start date"""
+  startDate: DateTime = null
+
+  """End date"""
+  endDate: DateTime = null
+
+  """Review cycle status"""
+  status: String = null
+
+  """Reviewers UIDs"""
+  reviewers: [String!] = []
+  uid: String!
+}
+
+type DocumentReviewStepCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentReviewStepEdge!]
+  items: [DocumentReviewStepType!]
+  totalCount: Int!
+}
+
+type DocumentReviewStepEdge {
+  cursor: String!
+  node: DocumentReviewStepType!
+}
+
+"""Response for document review step operations"""
+union DocumentReviewStepResponse = DocumentReviewStepType | OperationError
+
+type DocumentReviewStepType {
+  uid: String!
+  reviewCycleUid: String!
+  reviewCycle: DocumentReviewCycleType!
+  reviewerUid: String!
+  reviewer: UserType!
+  sequence: Int!
+  status: String!
+  comments: String
+  actionDate: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input DocumentReviewStepUpdateInputType {
+  """Review cycle UID"""
+  reviewCycle: String = null
+
+  """Reviewer UID"""
+  reviewer: String = null
+
+  """Review sequence"""
+  sequence: Int = null
+
+  """Review status"""
+  status: String = null
+
+  """Review comments"""
+  comments: String = null
+
+  """Action date"""
+  actionDate: DateTime = null
+  uid: String!
+}
+
+type DocumentStatusCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentStatusEdge!]
+  items: [DocumentStatusType!]
+  totalCount: Int!
+}
+
+type DocumentStatusEdge {
+  cursor: String!
+  node: DocumentStatusType!
+}
+
+input DocumentStatusInputType {
+  """Document UID"""
+  document: String!
+
+  """Document status"""
+  status: String!
+
+  """Status date"""
+  date: DateTime = null
+}
+
+"""Response for document status operations"""
+union DocumentStatusResponse = DocumentStatusType | OperationError
+
+type DocumentStatusType {
+  uid: String!
+  documentUid: String!
+  document: DocumentType
+  status: String!
+  date: String!
+  userUid: String!
+  user: UserType!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input DocumentStatusUpdateInputType {
+  """Document UID"""
+  document: String = null
+
+  """Document status"""
+  status: String = null
+
+  """Status date"""
+  date: DateTime = null
+  uid: String!
+}
+
+type DocumentSubscriptionCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentSubscriptionEdge!]
+  items: [DocumentSubscriptionType!]
+  totalCount: Int!
+}
+
+type DocumentSubscriptionEdge {
+  cursor: String!
+  node: DocumentSubscriptionType!
+}
+
+input DocumentSubscriptionInputType {
+  """Document UID"""
+  document: String!
+
+  """User UID"""
+  user: String!
+
+  """Subscription type"""
+  subscriptionType: String!
+}
+
+"""Response for document subscription operations"""
+union DocumentSubscriptionResponse = DocumentSubscriptionType | OperationError
+
+type DocumentSubscriptionType {
+  uid: String!
+  documentUid: String!
+  document: DocumentType!
+  userUid: String!
+  user: UserType!
+  subscriptionType: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input DocumentSubscriptionUpdateInputType {
+  """Document UID"""
+  document: String = null
+
+  """User UID"""
+  user: String = null
+
+  """Subscription type"""
+  subscriptionType: String = null
+  uid: String!
+}
+
+type DocumentTagCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentTagEdge!]
+  items: [DocumentTagType!]
+  totalCount: Int!
+}
+
+type DocumentTagEdge {
+  cursor: String!
+  node: DocumentTagType!
+}
+
+input DocumentTagInputType {
+  """Tag name"""
+  name: String!
+}
+
+"""Response for document tag operations"""
+union DocumentTagResponse = DocumentTagType | OperationError
+
+type DocumentTagType {
+  uid: String!
+  name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  documents: [DocumentType!]!
+}
+
+input DocumentTagUpdateInputType {
+  """Tag name"""
+  name: String = null
+  uid: String!
+}
+
+type DocumentTemplateCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentTemplateEdge!]
+  items: [DocumentTemplateType!]
+  totalCount: Int!
+}
+
+type DocumentTemplateEdge {
+  cursor: String!
+  node: DocumentTemplateType!
+}
+
+input DocumentTemplateInputType {
+  """Template name"""
+  name: String!
+
+  """Template description"""
+  description: String = null
+
+  """Template content"""
+  content: String!
+
+  """Category UID"""
+  category: String = null
+}
+
+"""Response for document template operations"""
+union DocumentTemplateResponse = DocumentTemplateType | OperationError
+
+type DocumentTemplateType {
+  uid: String!
+  name: String!
+  description: String
+  content: String!
+  categoryUid: String
+  category: DocumentCategoryType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  documents: [DocumentType!]!
+}
+
+input DocumentTemplateUpdateInputType {
+  """Template name"""
+  name: String = null
+
+  """Template description"""
+  description: String = null
+
+  """Template content"""
+  content: String = null
+
+  """Category UID"""
+  category: String = null
+  uid: String!
+}
+
+type DocumentType {
+  uid: String!
+  name: String!
+  subtitle: String
+  documentId: String!
+  folderUid: String
+  folder: DocumentFolderType
+  departmentUid: String
+  department: DepartmentType
+  categoryUid: String
+  category: DocumentCategoryType
+  templateUid: String
+  template: DocumentTemplateType
+  lastAccessed: String
+  lastAccessedByUid: String
+  lastAccessedBy: UserType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  tags: [DocumentTagType!]!
+  authors: [UserType!]!
+  readers: [UserType!]!
+  relatedTo: [DocumentType!]!
+  relatedFrom: [DocumentType!]!
+  versions: [DocumentVersionType!]!
+  statuses: [DocumentStatusType!]!
+  reviewCycles: [DocumentReviewCycleType!]!
+  subscriptions: [DocumentSubscriptionType!]!
+  auditRecords: [DocumentAuditType!]!
+  latestVersion: DocumentVersionType
+  content: String
+  editor: String
+  status: String
+}
+
+input DocumentUpdateInputType {
+  uid: String!
+
+  """Document name"""
+  name: String = null
+
+  """Document subtitle"""
+  subtitle: String = null
+
+  """Document ID"""
+  documentId: String = null
+
+  """Folder UID"""
+  folderUid: String = null
+
+  """Department UID"""
+  departmentUid: String = null
+
+  """Category UID"""
+  categoryUid: String = null
+
+  """Tag UIDs"""
+  tags: [String!] = []
+
+  """Author UIDs"""
+  authors: [String!] = []
+
+  """Reader UIDs"""
+  readers: [String!] = []
+}
+
+type DocumentVersionCursorPage {
+  pageInfo: PageInfo!
+  edges: [DocumentVersionEdge!]
+  items: [DocumentVersionType!]
+  totalCount: Int!
+}
+
+type DocumentVersionEdge {
+  cursor: String!
+  node: DocumentVersionType!
+}
+
+input DocumentVersionInputType {
+  """Document UID"""
+  document: String!
+
+  """Version number"""
+  versionNumber: String!
+
+  """Document content"""
+  content: String!
+
+  """Change summary"""
+  changeSummary: String = null
+}
+
+"""Response for document version operations"""
+union DocumentVersionResponse = DocumentVersionType | OperationError
+
+type DocumentVersionType {
+  uid: String!
+  documentUid: String!
+  document: DocumentType
+  versionNumber: String!
+  content: String!
+  editor: String!
+  thumbnail: String
+  changeSummary: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input DocumentVersionUpdateInputType {
+  """Document content"""
+  content: String!
+}
+
+enum ErrandCategory {
+  MESSAGE
+  ENGAGEMENT
+  TICKET
+  TODO
+  PROJECT
+}
+
+type FamilyHistoryType {
+  relationship: String!
+  condition: String!
+  icd10Code: String
+  ageAtDiagnosis: Int
+}
+
+type FileResponseType {
+  uid: String!
+  filename: String!
+  mimetype: String!
+  content: String!
+  size: Int!
+}
+
+type FileUrlResponseType {
+  uid: String!
+  filename: String!
+  mimetype: String!
+  downloadUrl: String!
+}
+
+type GrindBoardCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindBoardEdge!]
+  items: [GrindBoardType!]
+  totalCount: Int!
+}
+
+type GrindBoardEdge {
+  cursor: String!
+  node: GrindBoardType!
+}
+
+""""""
+union GrindBoardResponse = GrindBoardType | OperationError
+
+type GrindBoardType {
+  uid: String!
+  title: String!
+  description: String
+  schemeUid: String
+  scheme: GrindSchemeType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  posters: [GrindPosterType!]!
+}
+
+input GrindCreateBoardInput {
+  """Board Title"""
+  title: String!
+
+  """Board Description"""
+  description: String = null
+
+  """Board Scheme"""
+  schemeUid: String = null
+}
+
+input GrindCreateErrandDiscussionInput {
+  """Comment"""
+  comment: String!
+
+  """Errand uid"""
+  errandUid: String!
+
+  """Parent comment uid"""
+  parentUid: String = null
+}
+
+input GrindCreateErrandInput {
+  """Errand Category"""
+  category: ErrandCategory = null
+
+  """Errand Title"""
+  title: String = null
+
+  """Errand Description"""
+  description: String = null
+
+  """Errand Milestone"""
+  milestones: [String!] = []
+
+  """Assigned To"""
+  reporterUid: String = null
+
+  """Assigned To"""
+  assigneeUid: String = null
+
+  """Errand Label | Status"""
+  labelUid: String = null
+
+  """Errand Stamps | Tags"""
+  stamps: [String!] = []
+
+  """Errand Priority"""
+  priority: String = null
+
+  """Errand Poster"""
+  posterUid: String = null
+
+  """Errand Members"""
+  members: [String!] = []
+
+  """Start Date"""
+  startDate: DateTime = null
+
+  """End Date"""
+  endDate: DateTime = null
+}
+
+input GrindCreateLabelInput {
+  """Label title"""
+  title: String!
+
+  """Label category"""
+  category: LabelCategory!
+}
+
+input GrindCreateMediaInput {
+  """Media target"""
+  target: MediaTarget!
+
+  """Media Target ID"""
+  targetUid: String!
+  file: Upload!
+}
+
+input GrindCreateMilestoneInput {
+  """Milestone Errand"""
+  errandUid: String!
+
+  """Milestone Title"""
+  title: String = null
+
+  """Milestone Description"""
+  description: String = null
+
+  """Status"""
+  complete: Boolean = null
+
+  """Assigned to"""
+  assigneeUid: String = null
+}
+
+input GrindCreatePosterInput {
+  """Poster category"""
+  category: PosterCategory!
+
+  """Poster Title"""
+  title: String!
+
+  """Poster description"""
+  description: String = null
+
+  """Poster Board"""
+  boardUid: String = null
+
+  """Poster label"""
+  stamps: [String!] = []
+
+  """Assigned To"""
+  assigneeUid: String = null
+
+  """Poster Members"""
+  members: [String!] = []
+
+  """Poster status"""
+  status: String = null
+}
+
+input GrindCreateSchemeInput {
+  """Scheme Title"""
+  title: String!
+
+  """Scheme Description"""
+  description: String = null
+
+  """Assigned to"""
+  assignee: String = null
+
+  """Scheme Members"""
+  members: [String!] = []
+
+  """Start Date"""
+  startDate: DateTime = null
+
+  """End Date"""
+  endDate: DateTime = null
+}
+
+input GrindCreateStampInput {
+  """Stamp title"""
+  title: String!
+
+  """Stamp category"""
+  category: StampCategory!
+}
+
+type GrindErrandCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindErrandEdge!]
+  items: [GrindErrandType!]
+  totalCount: Int!
+}
+
+""""""
+union GrindErrandDiscussionResponse = GrindErrandDiscussionType | OperationError
+
+type GrindErrandDiscussionType {
+  uid: String!
+  comment: String!
+  errandUid: String
+  errand: GrindErrandType
+  parentUid: String
+  parent: GrindErrandDiscussionType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  subdiscussions: [GrindErrandDiscussionType!]!
+  canEdit: Boolean!
+}
+
+type GrindErrandEdge {
+  cursor: String!
+  node: GrindErrandType!
+}
+
+""""""
+union GrindErrandResponse = GrindErrandType | OperationError
+
+type GrindErrandType {
+  uid: String!
+  category: String
+  title: String
+  description: String
+  labelUid: String
+  label: GrindLabelType
+  priority: String
+  posterUid: String
+  poster: GrindPosterType
+  reporterUid: String
+  reporter: UserType
+  assigneeUid: String
+  assignee: UserType
+  startDate: String
+  endDate: String
+  progress: Int
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  members: [UserType!]!
+  stamps: [GrindStampType!]!
+  milestones: [GrindMilestoneType!]!
+  milestonesAt: Float!
+  occurrences: [GrindOccurrenceType!]!
+  media: [GrindMediaType!]!
+}
+
+type GrindLabelCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindLabelEdge!]
+  items: [GrindLabelType!]
+  totalCount: Int!
+}
+
+type GrindLabelEdge {
+  cursor: String!
+  node: GrindLabelType!
+}
+
+""""""
+union GrindLabelResponse = GrindLabelType | OperationError
+
+type GrindLabelType {
+  uid: String!
+  title: String!
+  category: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type GrindMediaCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindMediaEdge!]
+  items: [GrindMediaType!]
+  totalCount: Int!
+}
+
+type GrindMediaEdge {
+  cursor: String!
+  node: GrindMediaType!
+}
+
+""""""
+union GrindMediaResponse = GrindMediaType | OperationError
+
+type GrindMediaType {
+  uid: String!
+  target: String
+  targetUid: String
+  destination: String
+  encoding: String
+  filename: String
+  mimetype: String
+  originalName: String
+  path: String
+  size: String
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type GrindMilestoneCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindMilestoneEdge!]
+  items: [GrindMilestoneType!]
+  totalCount: Int!
+}
+
+type GrindMilestoneEdge {
+  cursor: String!
+  node: GrindMilestoneType!
+}
+
+""""""
+union GrindMilestoneResponse = GrindMilestoneType | OperationError
+
+type GrindMilestoneType {
+  uid: String!
+  errandUid: String
+  errand: GrindErrandType
+  title: String
+  description: String
+  complete: Boolean
+  assigneeUid: String
+  assignee: UserType
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  occurrences: [GrindOccurrenceType!]!
+}
+
+type GrindOccurrenceCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindOccurrenceEdge!]
+  items: [GrindOccurrenceType!]
+  totalCount: Int!
+}
+
+type GrindOccurrenceEdge {
+  cursor: String!
+  node: GrindOccurrenceType!
+}
+
+type GrindOccurrenceType {
+  uid: String!
+  target: String
+  targetUid: String
+  actorUid: String
+  actor: UserType
+  description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+type GrindPosterCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindPosterEdge!]
+  items: [GrindPosterType!]
+  totalCount: Int!
+}
+
+type GrindPosterEdge {
+  cursor: String!
+  node: GrindPosterType!
+}
+
+""""""
+union GrindPosterResponse = GrindPosterType | OperationError
+
+type GrindPosterType {
+  uid: String!
+  category: String
+  title: String
+  description: String
+  boardUid: String
+  board: GrindBoardType
+  assigneeUid: String
+  assignee: UserType
+  status: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  members: [UserType!]!
+  stamps: [GrindStampType!]!
+  errands: [GrindErrandType!]!
+}
+
+type GrindSchemeCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindSchemeEdge!]
+  items: [GrindSchemeType!]
+  totalCount: Int!
+}
+
+type GrindSchemeEdge {
+  cursor: String!
+  node: GrindSchemeType!
+}
+
+""""""
+union GrindSchemeResponse = GrindSchemeType | OperationError
+
+type GrindSchemeType {
+  uid: String!
+  title: String!
+  description: String
+  assigneeUid: String
+  assignee: UserType
+  startDate: String
+  endDate: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  members: [UserType!]!
+  boards: [GrindBoardType!]!
+}
+
+type GrindStampCursorPage {
+  pageInfo: PageInfo!
+  edges: [GrindStampEdge!]
+  items: [GrindStampType!]
+  totalCount: Int!
+}
+
+type GrindStampEdge {
+  cursor: String!
+  node: GrindStampType!
+}
+
+""""""
+union GrindStampResponse = GrindStampType | OperationError
+
+type GrindStampType {
+  uid: String!
+  title: String
+  category: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input GrindUpdateBoardInput {
+  """Board Title"""
+  title: String = null
+
+  """Board Description"""
+  description: String = null
+
+  """Board Scheme"""
+  schemeUid: String = null
+}
+
+input GrindUpdateErrandDiscussionInput {
+  """Comment"""
+  comment: String!
+
+  """Errand uid"""
+  errandUid: String!
+
+  """Parent comment uid"""
+  parentUid: String = null
+}
+
+input GrindUpdateErrandInput {
+  """Errand Category"""
+  category: ErrandCategory = null
+
+  """Errand Title"""
+  title: String = null
+
+  """Errand Description"""
+  description: String = null
+
+  """Errand Milestone"""
+  milestones: [String!] = []
+
+  """Assigned To"""
+  reporterUid: String = null
+
+  """Assigned To"""
+  assigneeUid: String = null
+
+  """Errand Label | Status"""
+  labelUid: String = null
+
+  """Errand Stamps | Tags"""
+  stamps: [String!] = []
+
+  """Errand Priority"""
+  priority: String = null
+
+  """Errand Poster"""
+  posterUid: String = null
+
+  """Errand Members"""
+  members: [String!] = []
+
+  """Start Date"""
+  startDate: DateTime = null
+
+  """End Date"""
+  endDate: DateTime = null
+}
+
+input GrindUpdateLabelInput {
+  """Label title"""
+  title: String = null
+
+  """Label category"""
+  category: String = null
+}
+
+input GrindUpdateMilestoneInput {
+  """Milestone Errand"""
+  errandUid: String!
+
+  """Milestone Title"""
+  title: String = null
+
+  """Milestone Description"""
+  description: String = null
+
+  """Status"""
+  complete: Boolean = null
+
+  """Assigned to"""
+  assigneeUid: String = null
+}
+
+input GrindUpdatePosterInput {
+  """Poster category"""
+  category: PosterCategory!
+
+  """Poster Title"""
+  title: String!
+
+  """Poster description"""
+  description: String = null
+
+  """Poster Board"""
+  boardUid: String = null
+
+  """Poster label"""
+  stamps: [String!] = []
+
+  """Assigned To"""
+  assigneeUid: String = null
+
+  """Poster Members"""
+  members: [String!] = []
+
+  """Poster status"""
+  status: String = null
+}
+
+input GrindUpdateSchemeInput {
+  """Scheme Title"""
+  title: String = null
+
+  """Scheme Description"""
+  description: String = null
+
+  """Assigned to"""
+  assignee: String = null
+
+  """Scheme Members"""
+  members: [String!] = []
+
+  """Start Date"""
+  startDate: DateTime = null
+
+  """End Date"""
+  endDate: DateTime = null
+}
+
+input GrindUpdateStampInput {
+  """Stamp title"""
+  title: String = null
+
+  """Stamp category"""
+  category: String = null
+}
+
 type GroupCount {
   group: String!
   count: Int
@@ -862,6 +3210,7 @@ type GroupType {
   permissions: [PermissionType!]
   active: Boolean
   pages: String
+  laboratoryUid: String
   createdByUid: String
   createdBy: GroupType
   createdAt: String
@@ -878,6 +3227,60 @@ type GroupedData {
   data: [GroupData!]!
 }
 
+input GuarantorInput {
+  patientUid: String!
+  isPatient: Boolean! = true
+  guarantorId: String = null
+  firstName: String = null
+  lastName: String = null
+  dateOfBirth: String = null
+  gender: String = null
+  relationshipToPatient: String = null
+  addressLine1: String = null
+  addressLine2: String = null
+  city: String = null
+  state: String = null
+  zipCode: String = null
+  phoneHome: String = null
+  phoneBusiness: String = null
+  phoneMobile: String = null
+  email: String = null
+  responsibilityPercentage: Int! = 100
+}
+
+""""""
+union GuarantorResponse = GuarantorType | OperationError
+
+type GuarantorType {
+  uid: String!
+  patientUid: String!
+  isPatient: Boolean!
+  guarantorId: String
+  firstName: String
+  lastName: String
+  dateOfBirth: String
+  gender: String
+  relationshipToPatient: String
+  addressLine1: String
+  addressLine2: String
+  city: String
+  state: String
+  zipCode: String
+  phoneHome: String
+  phoneBusiness: String
+  phoneMobile: String
+  email: String
+  responsibilityPercentage: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
 input HazardInputType {
   name: String!
   description: String!
@@ -890,6 +3293,8 @@ type HazardType {
   uid: String!
   name: String!
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -910,6 +3315,15 @@ type IdentificationType {
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+}
+
+type ImmunizationType {
+  vaccine: String!
+  epiNumber: String
+  date: String
+  facility: String
+  lotNumber: String
+  notes: String
 }
 
 input InstrumentCalibrationInput {
@@ -941,6 +3355,8 @@ type InstrumentCalibrationType {
   notesBefore: String!
   workDone: String!
   remarks: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -973,6 +3389,8 @@ type InstrumentCompetenceType {
   expiryDate: DateTime!
   internal: Boolean!
   competence: BytesScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1005,6 +3423,44 @@ input InstrumentInputType {
 """"""
 union InstrumentResponse = InstrumentType | OperationError
 
+input InstrumentResultExclusionsInput {
+  instrumentUid: String!
+  result: String!
+  reason: String = null
+}
+
+""""""
+union InstrumentResultExclusionsResponse = InstrumentResultExclusionsType | OperationError
+
+type InstrumentResultExclusionsType {
+  uid: String!
+  instrumentUid: String!
+  instrument: InstrumentType!
+  result: String!
+  reason: String
+}
+
+input InstrumentResultTranslationInput {
+  instrumentUid: String!
+  original: String!
+  translated: String!
+  keyword: String!
+  reason: String = null
+}
+
+""""""
+union InstrumentResultTranslationResponse = InstrumentResultTranslationType | OperationError
+
+type InstrumentResultTranslationType {
+  uid: String!
+  instrumentUid: String!
+  instrument: InstrumentType!
+  original: String!
+  translated: String!
+  keyword: String!
+  reason: String
+}
+
 type InstrumentType {
   uid: String!
   name: String
@@ -1016,6 +3472,8 @@ type InstrumentType {
   manufacturer: ManufacturerType
   instrumentTypeUid: String
   instrumentType: InstrumentTypeType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1023,6 +3481,7 @@ type InstrumentType {
   updatedBy: UserType
   updatedAt: String
   methods: [MethodType!]
+  laboratoryInstruments: [LaboratoryInstrumentType!]
 }
 
 type InstrumentTypeCursorPage {
@@ -1049,6 +3508,8 @@ type InstrumentTypeType {
   uid: String!
   name: String
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1057,12 +3518,79 @@ type InstrumentTypeType {
   updatedAt: String
 }
 
+input InsuranceCompanyInput {
+  name: String!
+  code: String = null
+  addressLine1: String = null
+  addressLine2: String = null
+  city: String = null
+  state: String = null
+  zipCode: String = null
+  country: String = null
+  phone: String = null
+  fax: String = null
+  email: String = null
+  website: String = null
+  claimsAddress: String = null
+  electronicPayerId: String = null
+  clearinghouse: String = null
+  fhirEndpoint: String = null
+  apiCredentials: JSONScalar = null
+  isActive: Boolean! = true
+}
+
+""""""
+union InsuranceCompanyResponse = InsuranceCompanyType | OperationError
+
+type InsuranceCompanyType {
+  uid: String!
+  name: String!
+  code: String
+  addressLine1: String
+  addressLine2: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+  phone: String
+  fax: String
+  email: String
+  website: String
+  claimsAddress: String
+  electronicPayerId: String
+  clearinghouse: String
+  fhirEndpoint: String
+  apiCredentials: JSONScalar
+  isActive: Boolean!
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
+type InsuranceValidationType {
+  isValid: Boolean!
+  reason: String!
+  coverageActive: Boolean!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
 """json field"""
 scalar JSONScalar
 
-input LaboratoryInputType {
-  labName: String!
-  setupName: String! = "felicity"
+enum LabelCategory {
+  TICKET
+}
+
+input LaboratoryCreateInputType {
+  name: String!
+  organizationUid: String!
   tagLine: String = ""
   email: String = null
   emailCc: String = null
@@ -1073,6 +3601,40 @@ input LaboratoryInputType {
   banking: String = null
   logo: String = null
   qualityStatement: String = null
+  code: String = null
+  countryUid: String = null
+  provinceUid: String = null
+  districtUid: String = null
+}
+
+type LaboratoryCursorPage {
+  pageInfo: PageInfo!
+  edges: [LaboratoryEdge!]
+  items: [LaboratoryType!]
+  totalCount: Int!
+}
+
+type LaboratoryEdge {
+  cursor: String!
+  node: LaboratoryType!
+}
+
+input LaboratoryInputType {
+  name: String!
+  tagLine: String = ""
+  email: String = null
+  emailCc: String = null
+  mobilePhone: String = null
+  businessPhone: String = null
+  labManagerUid: String = null
+  address: String = null
+  banking: String = null
+  logo: String = null
+  qualityStatement: String = null
+  code: String = null
+  countryUid: String = null
+  provinceUid: String = null
+  districtUid: String = null
 }
 
 type LaboratoryInstrumentCursorPage {
@@ -1106,6 +3668,18 @@ type LaboratoryInstrumentType {
   serialNumber: String
   dateCommissioned: DateTime
   dateDecommissioned: DateTime
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  isActive: Boolean!
+  isInterfacing: Boolean!
+  host: String
+  port: String
+  autoReconnect: Boolean!
+  protocolType: String
+  socketType: String
+  connection: String
+  transmission: String
+  syncUnits: Boolean!
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1131,6 +3705,9 @@ input LaboratorySettingInputType {
   stickerCopies: Int = 2
   allowBilling: Boolean = false
   allowAutoBilling: Boolean = false
+  processBilledOnly: Boolean = false
+  minPaymentStatus: PaymentStatus = PARTIAL
+  minPartialPerentage: Float = 0.5
   currency: String = "USD"
   paymentTermsDays: Int = 0
 }
@@ -1161,14 +3738,18 @@ type LaboratorySettingType {
   stickerCopies: Int
   allowAutoBilling: Boolean
   allowBilling: Boolean
+  processBilledOnly: Boolean
+  minPaymentStatus: PaymentStatus
+  minPartialPerentage: Float
   currency: String
   paymentTermsDays: Int
 }
 
 type LaboratoryType {
   uid: String!
-  setupName: String!
-  labName: String!
+  name: String!
+  organizationUid: String
+  organization: OrganizationType
   tagLine: String
   labManagerUid: String
   labManager: UserType
@@ -1181,12 +3762,19 @@ type LaboratoryType {
   banking: String
   logo: String
   qualityStatement: String
+  countryUid: String
+  country: CountryType
+  provinceUid: String
+  province: ProvinceType
+  districtUid: String
+  district: DistrictType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+  settings: LaboratorySettingType
 }
 
 type LaggardCounts {
@@ -1233,6 +3821,34 @@ type ManufacturerType {
   updatedAt: String
 }
 
+enum MediaTarget {
+  ERRAND
+}
+
+input MedicationInput {
+  drug: String!
+  dosage: String = null
+  frequency: String = null
+  route: String = null
+  startDate: String = null
+  endDate: String = null
+  treatmentType: String = null
+  prescribingProvider: String = null
+  status: String! = "active"
+}
+
+type MedicationType {
+  drug: String!
+  dosage: String
+  frequency: String
+  route: String
+  startDate: String
+  endDate: String
+  treatmentType: String
+  prescribingProvider: String
+  status: String!
+}
+
 """Union of possible outcomes when deleting some object"""
 union MessageResponse = MessagesType | OperationError
 
@@ -1242,6 +3858,8 @@ type MessageThreadType {
   messages: [MessageType!]
   broadcast: Boolean!
   deletedBy: [UserType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdAt: String
   createdBy: UserType
@@ -1261,6 +3879,8 @@ type MessageType {
   parent: MessageType
   left: Int!
   right: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -1301,6 +3921,8 @@ type MethodType {
   name: String
   description: String
   keyword: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1311,8 +3933,8 @@ type MethodType {
 }
 
 type Mutation {
-  createUser(firstName: String!, lastName: String!, email: String!, userName: String!, password: String!, passwordc: String!, groupUid: String = null, openReg: Boolean = false): UserResponse!
-  updateUser(userUid: String!, firstName: String, lastName: String, mobilePhone: String, email: String, groupUid: String, isActive: Boolean, password: String = null, passwordc: String = null): UserResponse!
+  createUser(firstName: String!, lastName: String!, email: String!, userName: String!, password: String!, passwordc: String!, activeLaboratoryUid: String = null, laboratoryUids: [String!] = null, groupUid: String = null, openReg: Boolean = false): UserResponse!
+  updateUser(userUid: String!, firstName: String, lastName: String, userName: String, mobilePhone: String, email: String, groupUid: String, isActive: Boolean, isBlocked: Boolean, activeLaboratoryUid: String = null, laboratoryUids: [String!] = null, password: String = null, passwordc: String = null): UserResponse!
   authenticateUser(username: String!, password: String!): AuthenticatedDataResponse!
   refresh(refreshToken: String!): AuthenticatedDataResponse!
   requestPasswordReset(email: String!): MessageResponse!
@@ -1321,7 +3943,15 @@ type Mutation {
   createGroup(payload: GroupInputType!): GroupResponse!
   updateGroup(uid: String!, payload: GroupInputType!): GroupResponse!
   updateGroupPermissions(groupUid: String!, permissionUid: String!): UpdatedGroupPermsResponse!
+  assignUserToLaboratory(userUid: String!, laboratoryUid: String!): UserLaboratoryAssignmentResponse!
+  removeUserFromLaboratory(userUid: String!, laboratoryUid: String!): UserLaboratoryAssignmentResponse!
+  setUserActiveLaboratory(userUid: String!, laboratoryUid: String!): UserResponse!
+  uploadProfilePicture(payload: ProfilePictureUploadInputType!): ProfilePictureUploadResponse!
+  updateOrganization(uid: String!, payload: OrganizationInputType!): OrganizationResponse!
+  updateOrganizationSetting(uid: String!, payload: OrganizationSettingInputType!): OrganizationSettingResponse!
+  createLaboratory(payload: LaboratoryCreateInputType!): LaboratoryResponse!
   updateLaboratory(uid: String!, payload: LaboratoryInputType!): LaboratoryResponse!
+  updateLaboratoryManager(laboratoryUid: String!, managerUid: String!): LaboratoryResponse!
   updateLaboratorySetting(uid: String!, payload: LaboratorySettingInputType!): LaboratorySettingResponse!
   createDepartment(payload: DepartmentInputType!): DepartmentResponse!
   updateDepartment(uid: String!, payload: DepartmentInputType!): DepartmentResponse!
@@ -1337,15 +3967,32 @@ type Mutation {
   updateDistrict(uid: String!, payload: DistrictInputType!): DistrictResponse!
   createUnit(payload: UnitInputType!): UnitResponse!
   updateUnit(uid: String!, payload: UnitInputType!): UnitResponse!
-  createClient(payload: ClientInputType!): ClientResponse!
-  updateClient(uid: String!, payload: ClientInputType!): ClientResponse!
-  createClientContact(payload: ClientContactInputType!): ClientContactResponse!
-  updateClientContact(uid: String!, payload: ClientContactInputType!): ClientContactResponse!
-  deleteClientContact(uid: String!): DeleteContactResponse!
-  createIdentification(name: String!): IdentificationResponse!
-  updateIdentification(uid: String!, name: String!): IdentificationResponse!
-  createPatient(payload: PatientInputType!): PatientResponse!
-  updatePatient(uid: String!, payload: PatientInputType!): PatientResponse!
+  createClient(payload: ClientInputType!): ClientResponse! @isAuthenticated @hasPermission
+  updateClient(uid: String!, payload: ClientInputType!): ClientResponse! @isAuthenticated @hasPermission
+  createClientContact(payload: ClientContactInputType!): ClientContactResponse! @isAuthenticated @hasPermission
+  updateClientContact(uid: String!, payload: ClientContactInputType!): ClientContactResponse! @isAuthenticated @hasPermission
+  deleteClientContact(uid: String!): DeleteContactResponse! @isAuthenticated @hasPermission
+  createIdentification(name: String!): IdentificationResponse! @isAuthenticated @hasPermission
+  updateIdentification(uid: String!, name: String!): IdentificationResponse! @isAuthenticated @hasPermission
+  createPatient(payload: PatientInputType!): PatientResponse! @isAuthenticated @hasPermission
+  updatePatient(uid: String!, payload: PatientInputType!): PatientResponse! @isAuthenticated @hasPermission
+  createOrUpdateMedicalHistory(payload: PatientMedicalHistoryInput!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  addChronicCondition(patientUid: String!, condition: ChronicConditionInput!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  removeChronicCondition(patientUid: String!, index: Int!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  addMedication(patientUid: String!, medication: MedicationInput!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  removeMedication(patientUid: String!, index: Int!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  addAllergy(patientUid: String!, allergy: AllergyInput!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  removeAllergy(patientUid: String!, index: Int!): PatientMedicalHistoryResponse! @isAuthenticated @hasPermission
+  createInsuranceCompany(payload: InsuranceCompanyInput!): InsuranceCompanyResponse! @isAuthenticated @hasPermission
+  updateInsuranceCompany(uid: String!, payload: InsuranceCompanyInput!): InsuranceCompanyResponse! @isAuthenticated @hasPermission
+  createPatientInsurance(payload: PatientInsuranceInput!): PatientInsuranceResponse! @isAuthenticated @hasPermission
+  updatePatientInsurance(uid: String!, payload: PatientInsuranceInput!): PatientInsuranceResponse! @isAuthenticated @hasPermission
+  deletePatientInsurance(uid: String!): Boolean! @isAuthenticated @hasPermission
+  createOrUpdateGuarantor(payload: GuarantorInput!): GuarantorResponse! @isAuthenticated @hasPermission
+  createClinicalDiagnosis(payload: ClinicalDiagnosisInput!): ClinicalDiagnosisResponse! @isAuthenticated @hasPermission
+  updateClinicalDiagnosis(uid: String!, payload: ClinicalDiagnosisInput!): ClinicalDiagnosisResponse! @isAuthenticated @hasPermission
+  deleteClinicalDiagnosis(uid: String!): Boolean! @isAuthenticated @hasPermission
+  assignDiagnosisPointers(patientUid: String!): [ClinicalDiagnosisType!]! @isAuthenticated @hasPermission
   createCodingStandard(payload: CodingStandardInputType!): CodingStandardResponse!
   updateCodingStandard(uid: String!, payload: CodingStandardInputType!): CodingStandardResponse!
   createSampleType(payload: SampleTypeInputType!): SampleTypeResponse!
@@ -1368,7 +4015,7 @@ type Mutation {
   updateAnalysis(uid: String!, payload: AnalysisInputType!): ProfilesServiceResponse!
   createAnalysisMapping(payload: AnalysisMappingInputType!): AnalysisMappingResponse!
   updateAnalysisMapping(uid: String!, payload: AnalysisMappingInputType!): AnalysisMappingResponse!
-  createAnalysisRequest(payload: AnalysisRequestInputType!): AnalysisRequestResponse!
+  createAnalysisRequest(payload: AnalysisRequestInputType!): AnalysisRequestResponse! @isAuthenticated @hasPermission
   createAnalysisInterim(payload: AnalysisInterimInput!): AnalysisInterimResponse!
   updateAnalysisInterim(uid: String!, payload: AnalysisInterimInput!): AnalysisInterimResponse!
   createAnalysisUncertainty(payload: AnalysisUncertaintyInput!): AnalysisUncertaintyResponse!
@@ -1379,44 +4026,44 @@ type Mutation {
   updateAnalysisDetectionLimit(uid: String!, payload: AnalysisDetectionLimitInput!): AnalysisDetectionLimitResponse!
   createAnalysisSpecification(payload: AnalysisSpecificationInput!): AnalysisSpecificationResponse!
   updateAnalysisSpecification(uid: String!, payload: AnalysisSpecificationInput!): AnalysisSpecificationResponse!
-  samplesApplyTemplate(uid: String!, analysisTemplateUid: String!): ResultedSampleActionResponse!
-  manageAnalyses(sampleUid: String!, payload: ManageAnalysisInputType!): ResultedSampleActionResponse!
-  cloneSamples(samples: [String!]!): SampleActionResponse!
-  cancelSamples(samples: [String!]!): ResultedSampleActionResponse!
-  reInstateSamples(samples: [String!]!): ResultedSampleActionResponse!
-  receiveSamples(samples: [String!]!): ResultedSampleActionResponse!
+  samplesApplyTemplate(uid: String!, analysisTemplateUid: String!): ResultedSampleActionResponse! @isAuthenticated @hasPermission
+  manageAnalyses(sampleUid: String!, payload: ManageAnalysisInputType!): ResultedSampleActionResponse! @isAuthenticated @hasPermission
+  cloneSamples(samples: [String!]!): SampleActionResponse! @isAuthenticated @hasPermission
+  cancelSamples(samples: [String!]!): ResultedSampleActionResponse! @isAuthenticated @hasPermission
+  reInstateSamples(samples: [String!]!): ResultedSampleActionResponse! @isAuthenticated @hasPermission
+  receiveSamples(samples: [String!]!): ResultedSampleActionResponse! @isAuthenticated @hasPermission
   verifySamples(samples: [String!]!): SampleActionResponse!
-  rejectSamples(samples: [SampleRejectInputType!]!): SampleActionResponse!
-  publishSamples(samples: [SamplePublishInputType!]!): SuccessErrorResponse!
-  printSamples(samples: [String!]!): SampleActionResponse!
-  invalidateSamples(samples: [String!]!): SampleActionResponse!
-  submitAnalysisResults(analysisResults: [ARResultInputType!]!, sourceObject: String!, sourceObjectUid: String!): AnalysisResultSubmitResponse!
+  rejectSamples(samples: [SampleRejectInputType!]!): SampleActionResponse! @isAuthenticated @hasPermission
+  publishSamples(samples: [SamplePublishInputType!]!): SampleActionResponse! @isAuthenticated @hasPermission
+  printSamples(samples: [String!]!): SampleActionResponse! @isAuthenticated @hasPermission
+  invalidateSamples(samples: [String!]!): SampleActionResponse! @isAuthenticated @hasPermission
+  submitAnalysisResults(analysisResults: [ARResultInputType!]!, sourceObject: String!, sourceObjectUid: String!): AnalysisResultSubmitResponse! @isAuthenticated @hasPermission
   verifyAnalysisResults(analyses: [String!]!, sourceObject: String!, sourceObjectUid: String!): AnalysisResultSubmitResponse!
-  retractAnalysisResults(analyses: [String!]!): AnalysisResultResponse!
-  retestAnalysisResults(analyses: [String!]!): AnalysisResultResponse!
-  cancelAnalysisResults(analyses: [String!]!): AnalysisResultResponse!
-  reInstateAnalysisResults(analyses: [String!]!): AnalysisResultResponse!
+  retractAnalysisResults(analyses: [String!]!): AnalysisResultResponse! @isAuthenticated @hasPermission
+  retestAnalysisResults(analyses: [String!]!): AnalysisResultResponse! @isAuthenticated @hasPermission
+  cancelAnalysisResults(analyses: [String!]!): AnalysisResultResponse! @isAuthenticated @hasPermission
+  reInstateAnalysisResults(analyses: [String!]!): AnalysisResultResponse! @isAuthenticated @hasPermission
   createQcSet(samples: [QCSetInputType!]!): QCSetResponse!
   createQcLevel(level: String!): QCLevelResponse!
   updateQcLevel(uid: String!, level: String!): QCLevelResponse!
   createQcTemplate(payload: QCTemplateInputType!): QCTemplateResponse!
   updateQcTemplate(uid: String!, payload: QCTemplateInputType!): QCTemplateResponse!
-  createWorksheetTemplate(payload: WorksheetTemplateInputType!): WorkSheetTemplateResponse!
-  updateWorksheetTemplate(uid: String!, payload: WorksheetTemplateInputType!): WorkSheetTemplateResponse!
-  createWorksheet(templateUid: String!, analystUid: String!, count: Int = 1): WorkSheetsResponse!
-  updateWorksheet(worksheetUid: String!, analystUid: String = null, instrumentUid: String = null, methodUid: String = null, action: String = null, samples: [String!] = null): WorkSheetResponse!
-  updateWorksheetApplyTemplate(templateUid: String!, worksheetUid: String!): WorkSheetResponse!
-  updateWorksheetManualAssign(uid: String!, analysesUids: [String!]!, qcTemplateUid: String = null): WorkSheetResponse!
+  createWorksheetTemplate(payload: WorksheetTemplateInputType!): WorkSheetTemplateResponse! @isAuthenticated @hasPermission
+  updateWorksheetTemplate(uid: String!, payload: WorksheetTemplateInputType!): WorkSheetTemplateResponse! @isAuthenticated @hasPermission
+  createWorksheet(templateUid: String!, analystUid: String!, count: Int = 1): WorkSheetsResponse! @isAuthenticated @hasPermission
+  updateWorksheet(worksheetUid: String!, analystUid: String = null, instrumentUid: String = null, methodUid: String = null, action: String = null, samples: [String!] = null): WorkSheetResponse! @isAuthenticated @hasPermission
+  updateWorksheetApplyTemplate(templateUid: String!, worksheetUid: String!): WorkSheetResponse! @isAuthenticated @hasPermission
+  updateWorksheetManualAssign(uid: String!, analysesUids: [String!]!, qcTemplateUid: String = null): WorkSheetResponse! @isAuthenticated @hasPermission
   actionWorksheets(uids: [String!]!, action: String!): WorkSheetsResponse!
   sendMessage(recipients: [String!]!, body: String!): MessageResponse!
   replyMessage(threadUid: String!, body: String!): MessageResponse!
   viewMessage(uid: String!): MessageResponse!
   deleteMessage(uid: String!): DeleteResponse!
   deleteThread(uid: String!): DeleteResponse!
-  createNotice(payload: NoticeInputType!): NoticeResponse!
-  updateNotice(uid: String!, payload: NoticeInputType!): NoticeResponse!
-  viewNotice(uid: String!, viewer: String!): NoticeType!
-  deleteNotice(uid: String!): DeleteResponse!
+  createNotice(payload: NoticeInputType!): NoticeResponse! @isAuthenticated @hasPermission
+  updateNotice(uid: String!, payload: NoticeInputType!): NoticeResponse! @isAuthenticated @hasPermission
+  viewNotice(uid: String!, viewer: String!): NoticeType! @isAuthenticated @hasPermission
+  deleteNotice(uid: String!): DeleteResponse! @isAuthenticated @hasPermission
   createReflexRule(payload: ReflexRuleInput!): ReflexRuleResponse!
   updateReflexRule(uid: String!, payload: ReflexRuleInput!): ReflexRuleResponse!
   createReflexAction(payload: ReflexActionInput!): ReflexActionResponse!
@@ -1424,34 +4071,34 @@ type Mutation {
   createReflexBrain(payload: ReflexBrainInput!): ReflexBrainResponse!
   updateReflexBrain(uid: String!, payload: ReflexBrainInput!): ReflexBrainResponse!
   deleteReflexBrain(uid: String!): DeletedItem!
-  createStoreRoom(payload: StoreRoomInputType!): StoreRoomResponse!
-  updateStoreRoom(uid: String!, payload: StoreRoomInputType!): StoreRoomResponse!
-  createStorageLocation(payload: StorageLocationInputType!): StorageLocationResponse!
-  updateStorageLocation(uid: String!, payload: StorageLocationInputType!): StorageLocationResponse!
-  createStorageSection(payload: StorageSectionInputType!): StorageSectionResponse!
-  updateStorageSection(uid: String!, payload: StorageSectionInputType!): StorageSectionResponse!
-  createStorageContainer(payload: StorageContainerInputType!): StorageContainerResponse!
-  updateStorageContainer(uid: String!, payload: StorageContainerInputType!): StorageContainerResponse!
-  storeSamples(payload: [StoreSamplesInputType!]!): StoreSampleResponse!
-  recoverSamples(sampleUids: [String!]!): StoreSampleResponse!
-  createStockItem(payload: StockItemInputType!): StockItemResponse!
-  updateStockItem(uid: String!, payload: StockItemInputType!): StockItemResponse!
-  createStockItemVariant(stockItemUid: String!, payload: StockItemVariantInputType!): StockItemVariantResponse!
-  updateStockItemVariant(uid: String!, payload: StockItemVariantInputType!): StockItemVariantResponse!
+  createStoreRoom(payload: StoreRoomInputType!): StoreRoomResponse! @isAuthenticated @hasPermission
+  updateStoreRoom(uid: String!, payload: StoreRoomInputType!): StoreRoomResponse! @isAuthenticated @hasPermission
+  createStorageLocation(payload: StorageLocationInputType!): StorageLocationResponse! @isAuthenticated @hasPermission
+  updateStorageLocation(uid: String!, payload: StorageLocationInputType!): StorageLocationResponse! @isAuthenticated @hasPermission
+  createStorageSection(payload: StorageSectionInputType!): StorageSectionResponse! @isAuthenticated @hasPermission
+  updateStorageSection(uid: String!, payload: StorageSectionInputType!): StorageSectionResponse! @isAuthenticated @hasPermission
+  createStorageContainer(payload: StorageContainerInputType!): StorageContainerResponse! @isAuthenticated @hasPermission
+  updateStorageContainer(uid: String!, payload: StorageContainerInputType!): StorageContainerResponse! @isAuthenticated @hasPermission
+  storeSamples(payload: [StoreSamplesInputType!]!): StoreSampleResponse! @isAuthenticated @hasPermission
+  recoverSamples(sampleUids: [String!]!): StoreSampleResponse! @isAuthenticated @hasPermission
+  createStockItem(payload: StockItemInputType!): StockItemResponse! @isAuthenticated @hasPermission
+  updateStockItem(uid: String!, payload: StockItemInputType!): StockItemResponse! @isAuthenticated @hasPermission
+  createStockItemVariant(stockItemUid: String!, payload: StockItemVariantInputType!): StockItemVariantResponse! @isAuthenticated @hasPermission
+  updateStockItemVariant(uid: String!, payload: StockItemVariantInputType!): StockItemVariantResponse! @isAuthenticated @hasPermission
   createStockCategory(payload: StockCategoryInputType!): StockCategoryResponse!
   updateStockCategory(uid: String!, payload: StockCategoryInputType!): StockCategoryResponse!
   createHazard(payload: HazardInputType!): HazardResponse!
   updateHazard(uid: String!, payload: HazardInputType!): HazardResponse!
   createStockUnit(payload: StockUnitInputType!): StockUnitResponse!
   updateStockUnit(uid: String!, payload: StockUnitInputType!): StockUnitResponse!
-  createStockReceipt(payload: StockReceiptInputType!): StockItemVariantResponse!
-  createStockOrder(payload: StockOrderInputType!): StockOrderResponse!
-  updateStockOrder(uid: String!, payload: StockOrderInputType!): StockOrderResponse!
-  submitStockOrder(uid: String!): StockOrderResponse!
-  approveStockOrder(uid: String!, payload: StockOrderApprovalInputType!): StockOrderResponse!
-  issueStockOrder(uid: String!, payload: [StockOrderProductLineInputType!]!): StockOrderResponse!
-  deleteStockOrder(uid: String!): StockOrderResponse!
-  createStockAdjustment(payload: StockAdjustmentInputType!): StockAdjustmentResponse!
+  createStockReceipt(payload: StockReceiptInputType!): StockItemVariantResponse! @isAuthenticated @hasPermission
+  createStockOrder(payload: StockOrderInputType!): StockOrderResponse! @isAuthenticated @hasPermission
+  updateStockOrder(uid: String!, payload: StockOrderInputType!): StockOrderResponse! @isAuthenticated @hasPermission
+  submitStockOrder(uid: String!): StockOrderResponse! @isAuthenticated @hasPermission
+  approveStockOrder(uid: String!, payload: StockOrderApprovalInputType!): StockOrderResponse! @isAuthenticated @hasPermission
+  issueStockOrder(uid: String!, payload: [StockOrderProductLineInputType!]!): StockOrderResponse! @isAuthenticated @hasPermission
+  deleteStockOrder(uid: String!): StockOrderResponse! @isAuthenticated @hasPermission
+  createStockAdjustment(payload: StockAdjustmentInputType!): StockAdjustmentResponse! @isAuthenticated @hasPermission
   createInstrumentType(payload: InstrumentTypeInputType!): InstrumentTypeResponse!
   updateInstrumentType(uid: String!, payload: InstrumentTypeInputType!): InstrumentTypeResponse!
   createInstrument(payload: InstrumentInputType!): InstrumentResponse!
@@ -1466,23 +4113,132 @@ type Mutation {
   updateCaliberationCertificate(uid: String!, payload: CalibrationCertificateInput!): CalibrationCertificateResponse!
   createMethod(payload: MethodInputType!): MethodResponse!
   updateMethod(uid: String!, payload: MethodInputType!): MethodResponse!
-  createShipment(payload: ShipmentInputType!): ShipmentsResponse!
-  updateShipment(uid: String!, payload: ShipmentUpdateInputType!): ShipmentResponse!
+  createInstrumentResultExclusions(payload: InstrumentResultExclusionsInput!): InstrumentResultExclusionsResponse!
+  updateInstrumentResultExclusions(uid: String!, payload: InstrumentResultExclusionsInput!): InstrumentResultExclusionsResponse!
+  createInstrumentResultTranslation(payload: InstrumentResultTranslationInput!): InstrumentResultTranslationResponse!
+  updateInstrumentResultTranslation(uid: String!, payload: InstrumentResultTranslationInput!): InstrumentResultTranslationResponse!
+  createShipment(payload: ShipmentInputType!): ShipmentsResponse! @isAuthenticated @hasPermission
+  updateShipment(uid: String!, payload: ShipmentUpdateInputType!): ShipmentResponse! @isAuthenticated @hasPermission
   actionShipment(uid: String!, action: String!): ShipmentResponse!
-  shipmentManageSamples(uid: String!, payload: ShipmentManageSamplesInput!): ShipmentResponse!
+  shipmentManageSamples(uid: String!, payload: ShipmentManageSamplesInput!): ShipmentResponse! @isAuthenticated @hasPermission
   createReferralLaboratory(payload: ReferralLaboratoryInputType!): ReferralLaboratoryResponse!
   updateReferralLaboratory(uid: String!, payload: ReferralLaboratoryInputType!): ReferralLaboratoryResponse!
-  updateProfilePrice(uid: String!, payload: PriceInput!): ProfilePriceResponse!
-  updateAnalysisPrice(uid: String!, payload: PriceInput!): AnalysisPriceResponse!
-  updateProfileDiscount(uid: String!, payload: PriceDiscountInput!): ProfileDiscountResponse!
-  updateAnalysisDiscount(uid: String!, payload: PriceDiscountInput!): AnalysisDiscountResponse!
-  createVoucher(payload: VoucherInput!): VoucherResponse!
-  updateVoucher(uid: String!, payload: VoucherInput!): VoucherResponse!
-  createVoucherCode(payload: VoucherCodeInput!): VoucherCodeResponse!
-  updateVoucherCode(uid: String!, payload: VoucherCodeInput!): VoucherCodeResponse!
-  createTestBillTransaction(payload: BillTransactionInput!): TestBillTransactionResponse!
-  confirmTestBillTransaction(uid: String!, notes: String): TestBillTransactionResponse!
-  applyVoucher(payload: ApplyVoucherInput!): TestBillTransactionResponse!
+  updateProfilePrice(uid: String!, payload: PriceInput!): ProfilePriceResponse! @isAuthenticated @hasPermission
+  updateAnalysisPrice(uid: String!, payload: PriceInput!): AnalysisPriceResponse! @isAuthenticated @hasPermission
+  updateProfileDiscount(uid: String!, payload: PriceDiscountInput!): ProfileDiscountResponse! @isAuthenticated @hasPermission
+  updateAnalysisDiscount(uid: String!, payload: PriceDiscountInput!): AnalysisDiscountResponse! @isAuthenticated @hasPermission
+  createVoucher(payload: VoucherInput!): VoucherResponse! @isAuthenticated @hasPermission
+  updateVoucher(uid: String!, payload: VoucherInput!): VoucherResponse! @isAuthenticated @hasPermission
+  createVoucherCode(payload: VoucherCodeInput!): VoucherCodeResponse! @isAuthenticated @hasPermission
+  updateVoucherCode(uid: String!, payload: VoucherCodeInput!): VoucherCodeResponse! @isAuthenticated @hasPermission
+  createTestBillTransaction(payload: BillTransactionInput!): TestBillTransactionResponse! @isAuthenticated @hasPermission
+  confirmTestBillTransaction(uid: String!, notes: String): TestBillTransactionResponse! @isAuthenticated @hasPermission
+  applyVoucher(payload: ApplyVoucherInput!): TestBillTransactionResponse! @isAuthenticated @hasPermission
+  createAbxGuideline(payload: AbxGuidelineInputType!): AbxGuidelineResponse!
+  updateAbxGuideline(uid: String!, payload: AbxGuidelineInputType!): AbxGuidelineResponse!
+  createAbxAntibiotic(payload: AbxAntibioticInputType!): AbxAntibioticResponse!
+  updateAbxAntibiotic(uid: String!, payload: AbxAntibioticInputType!): AbxAntibioticResponse!
+  useAbxAntibiotic(uid: String!): AbxAntibioticResponse!
+  discardAbxAntibiotic(uid: String!): DeletedItem!
+  createAbxAstPanel(payload: AbxASTPanelInputType!): AbxASTPanelResponse!
+  updateAbxAstPanel(uid: String!, payload: AbxASTPanelInputType!): AbxASTPanelResponse!
+  createAbxTestMethod(payload: AbxTestMethodInputType!): AbxTestMethodResponse!
+  updateAbxTestMethod(uid: String!, payload: AbxTestMethodInputType!): AbxTestMethodResponse!
+  createAbxBreakpointType(payload: AbxBreakpointTypeInputType!): AbxBreakpointTypeResponse!
+  updateAbxBreakpointType(uid: String!, payload: AbxBreakpointTypeInputType!): AbxBreakpointTypeResponse!
+  createAbxHost(payload: AbxHostInputType!): AbxHostResponse!
+  updateAbxHost(uid: String!, payload: AbxHostInputType!): AbxHostResponse!
+  createAbxSiteOfInfection(payload: AbxSiteOfInfectionInputType!): AbxSiteOfInfectionResponse!
+  updateAbxSiteOfInfection(uid: String!, payload: AbxSiteOfInfectionInputType!): AbxSiteOfInfectionResponse!
+  createAbxBreakpoint(payload: AbxBreakpointInputType!): AbxBreakpointResponse!
+  updateAbxBreakpoint(uid: String!, payload: AbxBreakpointInputType!): AbxBreakpointResponse!
+  createAbxMedium(payload: AbxMediumInputType!): AbxMediumResponse!
+  updateAbxMedium(uid: String!, payload: AbxMediumInputType!): AbxMediumResponse!
+  createAbxQcRange(payload: AbxQCRangeInputType!): AbxQCRangeResponse!
+  updateAbxQcRange(uid: String!, payload: AbxQCRangeInputType!): AbxQCRangeResponse!
+  createAbxKingdom(payload: AbxKingdomInputType!): AbxKingdomResponse!
+  updateAbxKingdom(uid: String!, payload: AbxKingdomInputType!): AbxKingdomResponse!
+  createAbxPhylum(payload: AbxPhylumInputType!): AbxPhylumResponse!
+  updateAbxPhylum(uid: String!, payload: AbxPhylumInputType!): AbxPhylumResponse!
+  createAbxOrder(payload: AbxOrderInputType!): AbxOrderResponse!
+  updateAbxOrder(uid: String!, payload: AbxOrderInputType!): AbxOrderResponse!
+  createAbxGenus(payload: AbxGenusInputType!): AbxGenusResponse!
+  updateAbxGenus(uid: String!, payload: AbxGenusInputType!): AbxGenusResponse!
+  createAbxFamily(payload: AbxFamilyInputType!): AbxFamilyResponse!
+  updateAbxFamily(uid: String!, payload: AbxFamilyInputType!): AbxFamilyResponse!
+  createAbxClass(payload: AbxClassInputType!): AbxClassResponse!
+  updateAbxClass(uid: String!, payload: AbxClassInputType!): AbxClassResponse!
+  createAbxOrganism(payload: AbxOrganismInputType!): AbxOrganismResponse!
+  updateAbxOrganism(uid: String!, payload: AbxOrganismInputType!): AbxOrganismResponse!
+  createAbxOrganismSerotype(payload: AbxOrganismSerotypeInputType!): AbxOrganismSerotypeResponse!
+  updateAbxOrganismSerotype(uid: String!, payload: AbxOrganismSerotypeInputType!): AbxOrganismSerotypeResponse!
+  createAbxOrganismResult(analysisResultUid: String!): AbxOrganismResultType!
+  removeAbxOrganismResult(uid: String!): DeleteResponse!
+  saveAbxOrganismResult(uid: String!, organismUid: String!): AbxOrganismResultType!
+  applyAbxAstPanel(payload: AbxApplyAstPanelInput!): AbxASTResultResponse!
+  updateAbxAstResults(payload: AbxASTResultsUpdateInput!): AbxASTResultResponse!
+  createAbxExpResPhenotype(payload: AbxExpResPhenotypeInputType!): AbxExpResPhenotypeResponse!
+  updateAbxExpResPhenotype(uid: String!, payload: AbxExpResPhenotypeInputType!): AbxExpResPhenotypeResponse!
+  createAbxExpertInterpretationRule(payload: AbxExpertInterpretationRuleInputType!): AbxExpertInterpretationRuleResponse!
+  updateAbxExpertInterpretationRule(uid: String!, payload: AbxExpertInterpretationRuleInputType!): AbxExpertInterpretationRuleResponse!
+  createGrindScheme(payload: GrindCreateSchemeInput!): GrindSchemeResponse! @isAuthenticated @hasPermission
+  updateGrindScheme(uid: String!, payload: GrindUpdateSchemeInput!): GrindSchemeResponse! @isAuthenticated @hasPermission
+  deleteGrindScheme(uid: String!): DeleteResponse! @isAuthenticated @hasPermission
+  createGrindBoard(payload: GrindCreateBoardInput!): GrindBoardResponse!
+  updateGrindBoard(uid: String!, payload: GrindUpdateBoardInput!): GrindBoardResponse!
+  deleteGrindBoard(uid: String!): DeleteResponse!
+  createGrindPoster(payload: GrindCreatePosterInput!): GrindPosterResponse!
+  updateGrindPoster(uid: String!, payload: GrindUpdatePosterInput!): GrindPosterResponse!
+  deleteGrindPoster(uid: String!): DeleteResponse!
+  createGrindErrand(payload: GrindCreateErrandInput!): GrindErrandResponse!
+  updateGrindErrand(uid: String!, payload: GrindUpdateErrandInput!): GrindErrandResponse!
+  deleteGrindErrand(uid: String!): DeleteResponse!
+  createGrindLabel(payload: GrindCreateLabelInput!): GrindLabelResponse!
+  updateGrindLabel(uid: String!, payload: GrindUpdateLabelInput!): GrindLabelResponse!
+  deleteGrindLabel(uid: String!): DeleteResponse!
+  createGrindMedia(payload: GrindCreateMediaInput!): GrindMediaResponse!
+  deleteGrindMedia(uid: String!): DeleteResponse!
+  createGrindMilestone(payload: GrindCreateMilestoneInput!): GrindMilestoneResponse!
+  updateGrindMilestone(uid: String!, payload: GrindUpdateMilestoneInput!): GrindMilestoneResponse!
+  deleteGrindMilestone(uid: String!): DeleteResponse!
+  createGrindStamp(payload: GrindCreateStampInput!): GrindStampResponse!
+  updateGrindStamp(uid: String!, payload: GrindUpdateStampInput!): GrindStampResponse!
+  deleteGrindStamp(uid: String!): DeleteResponse!
+  createGrindErrandDiscussion(payload: GrindCreateErrandDiscussionInput!): GrindErrandDiscussionResponse!
+  updateGrindErrandDiscussion(uid: String!, payload: GrindUpdateErrandDiscussionInput!): GrindErrandDiscussionResponse!
+  createDocumentCategory(payload: DocumentCategoryInputType!): DocumentCategoryResponse!
+  updateDocumentCategory(uid: String!, payload: DocumentCategoryUpdateInputType!): DocumentCategoryResponse!
+  deleteDocumentCategory(uid: String!): DocumentCategoryResponse!
+  createDocumentTag(payload: DocumentTagInputType!): DocumentTagResponse!
+  updateDocumentTag(uid: String!, payload: DocumentTagUpdateInputType!): DocumentTagResponse!
+  deleteDocumentTag(uid: String!): DocumentTagResponse!
+  createDocumentFolder(payload: DocumentFolderInputType!): DocumentFolderResponse! @isAuthenticated @hasPermission
+  updateDocumentFolder(uid: String!, payload: DocumentFolderUpdateInputType!): DocumentFolderResponse! @isAuthenticated @hasPermission
+  deleteDocumentFolder(uid: String!): DocumentFolderResponse! @isAuthenticated @hasPermission
+  createDocumentTemplate(payload: DocumentTemplateInputType!): DocumentTemplateResponse! @isAuthenticated @hasPermission
+  updateDocumentTemplate(uid: String!, payload: DocumentTemplateUpdateInputType!): DocumentTemplateResponse! @isAuthenticated @hasPermission
+  deleteDocumentTemplate(uid: String!): DocumentTemplateResponse! @isAuthenticated @hasPermission
+  createDocument(payload: DocumentInputType!): DocumentResponse! @isAuthenticated @hasPermission
+  updateDocument(uid: String!, payload: DocumentUpdateInputType!): DocumentResponse! @isAuthenticated @hasPermission
+  deleteDocument(uid: String!): DocumentResponse! @isAuthenticated @hasPermission
+  createDocumentVersion(payload: DocumentVersionInputType!): DocumentVersionResponse! @isAuthenticated @hasPermission
+  updateDocumentVersion(uid: String!, payload: DocumentVersionUpdateInputType!): DocumentVersionResponse! @isAuthenticated @hasPermission
+  deleteDocumentVersion(uid: String!): DocumentVersionResponse! @isAuthenticated @hasPermission
+  createDocumentStatus(payload: DocumentStatusInputType!): DocumentStatusResponse!
+  updateDocumentStatus(uid: String!, payload: DocumentStatusUpdateInputType!): DocumentStatusResponse!
+  createDocumentReviewCycle(payload: DocumentReviewCycleInputType!): DocumentReviewCycleResponse! @isAuthenticated @hasPermission
+  updateDocumentReviewCycle(uid: String!, payload: DocumentReviewCycleUpdateInputType!): DocumentReviewCycleResponse! @isAuthenticated @hasPermission
+  deleteDocumentReviewCycle(uid: String!): DocumentReviewCycleResponse! @isAuthenticated @hasPermission
+  updateDocumentReviewStep(uid: String!, payload: DocumentReviewStepUpdateInputType!): DocumentReviewStepResponse! @isAuthenticated @hasPermission
+  createDocumentSubscription(payload: DocumentSubscriptionInputType!): DocumentSubscriptionResponse!
+  updateDocumentSubscription(uid: String!, payload: DocumentSubscriptionUpdateInputType!): DocumentSubscriptionResponse!
+  deleteDocumentSubscription(uid: String!): DocumentSubscriptionResponse!
+  createDocumentAudit(payload: DocumentAuditInputType!): DocumentAuditResponse!
+  createDocumentRelation(payload: DocumentRelationInputType!): DocumentRelationResponse!
+  deleteDocumentRelation(payload: DocumentRelationInputType!): DocumentRelationResponse!
+  createSmsTemplate(payload: SmsTemplateInputType!): SmsTemplateResponse!
+  updateSmsTemplate(uid: String!, payload: SmsTemplateInputType!): SmsTemplateResponse!
+  deleteSmsTemplate(uid: String!): OperationErrorDeletedItem!
 }
 
 type Nothing {
@@ -1508,12 +4264,22 @@ type NoticeType {
   body: String!
   viewers: [UserType!]
   expiry: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
   updatedAt: String
   updatedByUid: String
   updatedBy: UserType
+}
+
+enum NotificationObjectType {
+  SAMPLE
+  ANALYSIS_RESULT
+  WORKSHEET
+  REPORT
+  SHIPMENT
 }
 
 type NotificationType {
@@ -1523,6 +4289,8 @@ type NotificationType {
   users: UserType
   message: String!
   viewers: UserType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -1533,8 +4301,97 @@ type OperationError {
   suggestion: String
 }
 
+union OperationErrorDeletedItem = OperationError | DeletedItem
+
 type OperationSuccess {
   message: String!
+}
+
+input OrganizationInputType {
+  name: String = ""
+  tagLine: String = ""
+  email: String = null
+  emailCc: String = null
+  mobilePhone: String = null
+  businessPhone: String = null
+  labManagerUid: String = null
+  address: String = null
+  banking: String = null
+  logo: String = null
+  qualityStatement: String = null
+  code: String = null
+  countryUid: String = null
+  provinceUid: String = null
+  districtUid: String = null
+}
+
+""""""
+union OrganizationResponse = OrganizationType | OperationError
+
+input OrganizationSettingInputType {
+  passwordLifetime: Int = null
+  inactivityLogOut: Int = null
+  allowBilling: Boolean = false
+  allowAutoBilling: Boolean = false
+  processBilledOnly: Boolean = false
+  minPaymentStatus: PaymentStatus = PARTIAL
+  minPartialPerentage: Float = 0.5
+  currency: String = "USD"
+  paymentTermsDays: Int = 0
+}
+
+""""""
+union OrganizationSettingResponse = OrganizationSettingType | OperationError
+
+type OrganizationSettingType {
+  uid: String!
+  organizationUid: String
+  organization: OrganizationType
+  passwordLifetime: Int
+  inactivityLogOut: Int
+  allowAutoBilling: Boolean
+  allowBilling: Boolean
+  processBilledOnly: Boolean
+  minPaymentStatus: PaymentStatus
+  minPartialPerentage: Float
+  currency: String
+  paymentTermsDays: Int
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
+type OrganizationType {
+  uid: String!
+  name: String!
+  setupName: String!
+  tagLine: String
+  timezone: String
+  code: String
+  email: String
+  emailCc: String
+  mobilePhone: String
+  businessPhone: String
+  address: String
+  banking: String
+  logo: String
+  qualityStatement: String
+  countryUid: String
+  country: CountryType
+  provinceUid: String
+  province: ProvinceType
+  districtUid: String
+  district: DistrictType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+  settings: OrganizationSettingType!
 }
 
 type PageInfo {
@@ -1570,6 +4427,8 @@ type PatientIdentificationType {
   identificationUid: String!
   identification: IdentificationType
   value: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1598,6 +4457,110 @@ input PatientInputType {
   identifications: [PatientidentificationInput!]
 }
 
+input PatientInsuranceInput {
+  patientUid: String!
+  priority: String!
+  insuranceCompanyUid: String!
+  policyNumber: String!
+  groupNumber: String = null
+  planName: String = null
+  subscriberIsPatient: Boolean! = true
+  subscriberFirstName: String = null
+  subscriberLastName: String = null
+  subscriberDob: String = null
+  subscriberGender: String = null
+  subscriberId: String = null
+  relationshipToPatient: String = null
+  effectiveDate: DateTime = null
+  terminationDate: DateTime = null
+  copayAmount: Float = null
+  deductibleAmount: Float = null
+  invoiceToInsurance: Boolean! = true
+  requiresAuthorization: Boolean! = false
+  authorizationNumber: String = null
+  isActive: Boolean! = true
+}
+
+""""""
+union PatientInsuranceResponse = PatientInsuranceType | OperationError
+
+type PatientInsuranceType {
+  uid: String!
+  patientUid: String!
+  priority: String!
+  isActive: Boolean!
+  insuranceCompanyUid: String
+  insuranceCompany: InsuranceCompanyType
+  policyNumber: String
+  groupNumber: String
+  planName: String
+  subscriberIsPatient: Boolean!
+  subscriberFirstName: String
+  subscriberLastName: String
+  subscriberDob: String
+  subscriberGender: String
+  subscriberId: String
+  relationshipToPatient: String
+  effectiveDate: DateTime
+  terminationDate: DateTime
+  copayAmount: Float
+  deductibleAmount: Float
+  invoiceToInsurance: Boolean!
+  requiresAuthorization: Boolean!
+  authorizationNumber: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
+input PatientMedicalHistoryInput {
+  patientUid: String!
+  menstrualStatus: String = null
+  pregnancyStatus: Boolean = null
+  pregnancyDueDate: String = null
+  smokingStatus: String = null
+  alcoholUse: String = null
+  drugUse: String = null
+  occupation: String = null
+  notes: String = null
+}
+
+""""""
+union PatientMedicalHistoryResponse = PatientMedicalHistoryType | OperationError
+
+type PatientMedicalHistoryType {
+  uid: String!
+  patientUid: String!
+  chronicConditions: [ChronicConditionType!]
+  treatmentHistory: [MedicationType!]
+  allergies: [AllergyType!]
+  immunizations: [ImmunizationType!]
+  travelHistory: [TravelHistoryType!]
+  familyHistory: [FamilyHistoryType!]
+  surgicalHistory: [SurgicalHistoryType!]
+  menstrualStatus: String
+  pregnancyStatus: Boolean
+  pregnancyDueDate: String
+  smokingStatus: String
+  alcoholUse: String
+  drugUse: String
+  occupation: String
+  notes: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdByUid: String
+  createdBy: UserType
+  createdAt: String
+  updatedByUid: String
+  updatedBy: UserType
+  updatedAt: String
+}
+
 """"""
 union PatientResponse = PatientType | OperationError
 
@@ -1606,7 +4569,6 @@ type PatientType {
   clientPatientId: String!
   patientId: String!
   clientUid: String!
-  client: ClientType
   firstName: String
   middleName: String
   lastName: String
@@ -1621,23 +4583,33 @@ type PatientType {
   internalUse: Boolean!
   active: Boolean!
   districtUid: String
-  district: DistrictType
   provinceUid: String
-  province: ProvinceType
   countryUid: String
-  country: CountryType
   identifications: [PatientIdentificationType!]
+  metadataSnapshot: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+  client: ClientType
+  district: DistrictType
+  province: ProvinceType
+  country: CountryType
 }
 
 input PatientidentificationInput {
   value: String!
   identificationUid: String!
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
 }
 
 type PermissionType {
@@ -1651,6 +4623,19 @@ type PermissionType {
   updatedByUid: String
   updatedBy: PermissionType
   updatedAt: String
+}
+
+type PermissionUsageSummaryType {
+  permission: PermissionType!
+  globalGroups: [GroupType!]!
+  totalGroups: Int!
+}
+
+enum PosterCategory {
+  LISTING
+  ENGAGEMENT
+  TODO
+  MESSAGE
 }
 
 input PriceDiscountInput {
@@ -1705,6 +4690,8 @@ type ProfileDiscountType {
   valuePercent: Float!
   valueAmount: Float!
   isActive: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -1743,12 +4730,30 @@ type ProfileMappingType {
   name: String
   description: String
   code: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+}
+
+input ProfilePictureUploadInputType {
+  userUid: String!
+  imageData: String!
+  fileName: String!
+  contentType: String!
+}
+
+""""""
+union ProfilePictureUploadResponse = ProfilePictureUploadResultType | OperationError
+
+type ProfilePictureUploadResultType {
+  user: UserType!
+  profilePictureUrl: String!
+  message: String!
 }
 
 """"""
@@ -1760,6 +4765,8 @@ type ProfilePriceType {
   profile: ProfileType!
   isActive: Boolean!
   amount: Float!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -1779,6 +4786,8 @@ type ProfileType {
   analyses: [AnalysisType!]
   sampleTypes: [SampleTypeTyp!]
   active: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1841,6 +4850,8 @@ union QCLevelResponse = QCLevelType | OperationError
 type QCLevelType {
   uid: String!
   level: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1862,7 +4873,7 @@ type QCSetEdge {
 }
 
 input QCSetInputType {
-  qcTemplateUid: String
+  qcTemplateUid: String = null
   qcLevels: [String!]!
   analysisProfiles: [String!]!
   analysisServices: [String!]!
@@ -1875,6 +4886,9 @@ type QCSetType {
   uid: String!
   name: String!
   note: String!
+  status: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1887,6 +4901,9 @@ type QCSetWithSamples {
   uid: String!
   name: String!
   note: String!
+  status: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1912,6 +4929,8 @@ type QCTemplateType {
   description: String
   departments: [DepartmentType!]!
   qcLevels: [QCLevelType!]!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -1921,8 +4940,7 @@ type QCTemplateType {
 }
 
 type Query {
-  laboratory(setupName: String!): LaboratoryType!
-  laboratorySetting(setupName: String!): LaboratorySettingType!
+  laboratoryAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, organizationUid: String = null, sortBy: [String!] = null): LaboratoryCursorPage!
   manufacturerAll: [ManufacturerType!]!
   supplierAll: [SupplierType!]!
   departmentAll: [DepartmentType!]!
@@ -1930,6 +4948,12 @@ type Query {
   provinceAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): ProvinceCursorPage!
   countryAll: [CountryType!]!
   unitAll: [UnitType!]!
+  organization: OrganizationType!
+  laboratory: LaboratoryType!
+  laboratoryByUid(uid: String!): LaboratoryType!
+  laboratorySettingByLaboratoryUid(uid: String!): LaboratorySettingType!
+  laboratoriesByOrganization(organizationUid: String!): [LaboratoryType!]!
+  laboratorySearch(text: String!, limit: Int! = 10): [LaboratoryType!]!
   manufacturerByUid(uid: String!): ManufacturerType!
   supplierByUid(uid: String!): SupplierType!
   departmentByUid(uid: String!): DepartmentType!
@@ -1940,39 +4964,65 @@ type Query {
   countryByUid(uid: String!): CountryType!
   unitByUid(uid: String!): UnitType!
   auditLogsFilter(targetType: String!, targetUid: String!): [AuditLogType!]
-  userAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): UserCursorPage!
+  userAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, laboratoryUid: String = null, sortBy: [String!] = null): UserCursorPage!
   userMe(token: String!): UserType
   userByEmail(email: String!): UserType
-  groupAll: [GroupType!]!
+  groupAll(laboratoryUid: String = null): [GroupType!]!
   groupByUid(uid: String!): GroupType
+  groupsByLaboratory(laboratoryUid: String = null): [GroupType!]!
+  groupByName(name: String!, laboratoryUid: String = null): GroupType
+  groupSearch(text: String!, laboratoryUid: String = null, limit: Int! = 10): [GroupType!]!
+  groupsWithPermission(permissionUid: String!, laboratoryUid: String = null): [GroupType!]!
   permissionAll: [PermissionType!]!
   permissionByUid(uid: String!): PermissionType
-  clientAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): ClientCursorPage!
-  clientByUid(uid: String!): ClientType!
-  clientByCode(code: String!): ClientType!
-  clientsByName(name: String!): [ClientType!]!
-  clientSearch(queryString: String!): [ClientType!]!
-  clientContactAll: [ClientContactType!]!
-  clientContactUid(uid: String!): ClientContactType!
-  clientContactByClientUid(clientUid: String!): [ClientContactType!]!
-  patientAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): PatientCursorPage!
-  patientByUid(uid: String!): PatientType
-  patientByPatientId(patientId: String!): PatientType
-  patientSearch(queryString: String!): [PatientType!]!
-  identificationAll: [IdentificationType!]!
-  identificationByUid(uid: String!): IdentificationType!
+  permissionsByAction(action: String!): [PermissionType!]!
+  permissionsByTarget(target: String!): [PermissionType!]!
+  permissionsByActionTarget(action: String!, target: String!): [PermissionType!]!
+  permissionSearch(text: String!, limit: Int! = 10): [PermissionType!]!
+  permissionUsageSummary(permissionUid: String!): PermissionUsageSummaryType!
+  usersByLaboratory(laboratoryUid: String!): [UserType!]!
+  userLaboratories(userUid: String!): [String!]!
+  userAccessSummary(userUid: String!): UserAccessSummaryType!
+  userSearch(text: String!, laboratoryUid: String = null, limit: Int! = 10): [UserType!]!
+  userByEmailOrUsername(identifier: String!): UserType
+  userByUid(uid: String!): UserType
+  clientAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): ClientCursorPage! @isAuthenticated @hasPermission
+  clientByUid(uid: String!): ClientType! @isAuthenticated @hasPermission
+  clientByCode(code: String!): ClientType! @isAuthenticated @hasPermission
+  clientsByName(name: String!): [ClientType!]! @isAuthenticated @hasPermission
+  clientSearch(queryString: String!): [ClientType!]! @isAuthenticated @hasPermission
+  clientContactAll: [ClientContactType!]! @isAuthenticated @hasPermission
+  clientContactUid(uid: String!): ClientContactType! @isAuthenticated @hasPermission
+  clientContactByClientUid(clientUid: String!): [ClientContactType!]! @isAuthenticated @hasPermission
+  patientAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): PatientCursorPage! @isAuthenticated @hasPermission
+  patientByUid(uid: String!): PatientType @isAuthenticated @hasPermission
+  patientByPatientId(patientId: String!): PatientType @isAuthenticated @hasPermission
+  patientSearch(queryString: String!): [PatientType!]! @isAuthenticated @hasPermission
+  identificationAll: [IdentificationType!]! @isAuthenticated @hasPermission
+  identificationByUid(uid: String!): IdentificationType! @isAuthenticated @hasPermission
+  patientMedicalHistory(patientUid: String!): PatientMedicalHistoryType @isAuthenticated @hasPermission
+  activeMedications(patientUid: String!): [MedicationType!]! @isAuthenticated @hasPermission
+  verifiedAllergies(patientUid: String!): [AllergyType!]! @isAuthenticated @hasPermission
+  patientInsurance(patientUid: String!, activeOnly: Boolean! = true): [PatientInsuranceType!]! @isAuthenticated @hasPermission
+  primaryInsurance(patientUid: String!): PatientInsuranceType @isAuthenticated @hasPermission
+  validateInsurance(insuranceUid: String!): InsuranceValidationType! @isAuthenticated @hasPermission
+  insuranceCompanies(activeOnly: Boolean! = true): [InsuranceCompanyType!]! @isAuthenticated @hasPermission
+  patientGuarantor(patientUid: String!): GuarantorType @isAuthenticated @hasPermission
+  patientDiagnoses(patientUid: String!, activeOnly: Boolean! = true): [ClinicalDiagnosisType!]! @isAuthenticated @hasPermission
+  primaryDiagnosis(patientUid: String!): ClinicalDiagnosisType @isAuthenticated @hasPermission
+  diagnosisForAnalysisRequest(analysisRequestUid: String!): [ClinicalDiagnosisType!]! @isAuthenticated @hasPermission
   codingStandardAll: [CodingStandardType!]!
   sampleTypeAll: [SampleTypeTyp!]!
   sampleTypeByUid(uid: String!): SampleTypeTyp!
   sampleTypeMappingsBySampleType(sampleTypeUid: String!): [SampleTypeMappingType!]!
-  sampleAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, status: String = null, clientUid: String = null, sortBy: [String!] = null): SampleCursorPage!
-  samplesForShipmentAssign(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null, analysisUid: String = null, sampleTypeUid: String = null): SampleCursorPage!
-  sampleSearch(status: String!, text: String!, clientUid: String!): [SampleType!]!
-  sampleCount(status: String!, text: String!, clientUid: String!): Int!
-  sampleByUid(uid: String!): SampleType!
-  sampleByParentId(parentId: String!, text: String = null): [SampleType!]!
-  samplesByUids(sampleUids: [String!]! = []): [SamplesWithResults!]!
-  samplesByStorageContainerUid(uid: String!): [SampleType!]!
+  sampleAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, status: String = null, clientUid: String = null, sortBy: [String!] = null): SampleCursorPage! @isAuthenticated @hasPermission
+  samplesForShipmentAssign(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null, analysisUid: String = null, sampleTypeUid: String = null): SampleCursorPage! @isAuthenticated @hasPermission
+  sampleSearch(status: String!, text: String!, clientUid: String!): [SampleType!]! @isAuthenticated @hasPermission
+  sampleCount(status: String!, text: String!, clientUid: String!): Int! @isAuthenticated @hasPermission
+  sampleByUid(uid: String!): SampleType! @isAuthenticated @hasPermission
+  sampleByParentId(parentId: String!, text: String = null): [SampleType!]! @isAuthenticated @hasPermission
+  samplesByUids(sampleUids: [String!]!): [SamplesWithResults!]! @isAuthenticated @hasPermission
+  samplesByStorageContainerUid(uid: String!): [SampleType!]! @isAuthenticated @hasPermission
   profileAll: [ProfileType!]!
   profileByUid(uid: String!): ProfileType!
   profileMappingsByProfile(profileUid: String!): [ProfileMappingType!]!
@@ -1984,13 +5034,13 @@ type Query {
   analysisByUid(uid: String!): AnalysisType!
   analysisMappingsByAnalysis(analysisUid: String!): [AnalysisMappingType!]!
   analysisWithoutProfile: [AnalysisType!]!
-  analysisRequestAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): AnalysisRequestCursorPage!
-  analysisRequestByUid(uid: String!): AnalysisRequestWithSamples!
-  analysisRequestsByPatientUid(uid: String!): [AnalysisRequestWithSamples!]!
-  analysisRequestsByClientUid(uid: String!): [AnalysisRequestWithSamples!]!
-  analysisResultByUid(uid: String!): AnalysisResultType!
-  analysisResultBySampleUid(uid: String!): [AnalysisResultType!]!
-  analysisResultsForWsAssign(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null, analysisUid: String = null, sampleTypeUid: String = null): AnalysisResultCursorPage!
+  analysisRequestAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): AnalysisRequestCursorPage! @isAuthenticated @hasPermission
+  analysisRequestByUid(uid: String!): AnalysisRequestWithSamples! @isAuthenticated @hasPermission
+  analysisRequestsByPatientUid(uid: String!): [AnalysisRequestWithSamples!]! @isAuthenticated @hasPermission
+  analysisRequestsByClientUid(uid: String!): [AnalysisRequestWithSamples!]! @isAuthenticated @hasPermission
+  analysisResultByUid(uid: String!): AnalysisResultType! @isAuthenticated @hasPermission
+  analysisResultBySampleUid(uid: String!): [AnalysisResultType!]! @isAuthenticated @hasPermission
+  analysisResultsForWsAssign(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null, analysisUid: String = null, sampleTypeUid: String = null): AnalysisResultCursorPage! @isAuthenticated @hasPermission
   analysisInterimAll: [AnalysisInterimType!]!
   analysisInterimByUid(uid: String!): AnalysisInterimType!
   analysisCorrectionFactorAll: [AnalysisCorrectionFactorType!]!
@@ -2001,69 +5051,70 @@ type Query {
   analysisDetectionLimitByUid(uid: String!): AnalysisDetectionLimitType!
   analysisSpecificationAll: [AnalysisSpecificationType!]!
   analysisSpecificationUid(uid: String!): AnalysisSpecificationType!
-  qcSetAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): QCSetCursorPage!
-  qcSetByUid(uid: String!): QCSetWithSamples!
+  qcSetAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, status: String = null, sortBy: [String!]! = ["-uid"]): QCSetCursorPage! @isAuthenticated @hasPermission
+  qcSetByUid(uid: String!): QCSetWithSamples! @isAuthenticated @hasPermission
   qcLevelAll: [QCLevelType!]!
   qcLevelByUid(uid: String!): QCLevelType!
   qcTemplateAll: [QCTemplateType!]!
   qcTemplateByUid(uid: String!): QCTemplateType!
-  resultOptionsByAnalysisUid(uid: String!): ResultOptionType!
+  resultOptionsByAnalysisUid(uid: String!): [ResultOptionType!]!
   rejectionReasonsAll: [RejectionReasonType!]!
   rejectionReasonByUid(uid: String!): RejectionReasonType!
-  resultMutationByResultUid(resultUid: String!): ResultMutationType
-  worksheetAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, status: String = null, sortBy: [String!] = null): WorkSheetCursorPage!
-  worksheetTemplateAll: [WorkSheetTemplateType!]!
-  worksheetByAnalyst(analystUid: String!): [WorkSheetType!]!
-  worksheetByUid(worksheetUid: String!): WorkSheetType!
-  worksheetById(worksheetId: String!): WorkSheetType!
-  worksheetByStatus(worksheetStatus: String!): [WorkSheetType!]!
-  worksheetTemplateByUid(worksheetUid: String!): [WorkSheetType!]!
+  resultMutationByResultUid(resultUid: String!): ResultMutationType @isAuthenticated @hasPermission
+  qcChartData(analyses: [String!]!, month: Int!, year: Int!): [AnalysisResultType!]! @isAuthenticated @hasPermission
+  worksheetAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, status: String = null, sortBy: [String!] = null): WorkSheetCursorPage! @isAuthenticated @hasPermission
+  worksheetByAnalyst(analystUid: String!): [WorkSheetType!]! @isAuthenticated @hasPermission
+  worksheetByUid(worksheetUid: String!): WorkSheetType! @isAuthenticated @hasPermission
+  worksheetById(worksheetId: String!): WorkSheetType! @isAuthenticated @hasPermission
+  worksheetByStatus(worksheetStatus: String!): [WorkSheetType!]! @isAuthenticated @hasPermission
+  worksheetTemplateAll: [WorkSheetTemplateType!]! @isAuthenticated @hasPermission
+  worksheetTemplateByUid(worksheetUid: String!): [WorkSheetType!]! @isAuthenticated @hasPermission
   threadsForUser(uid: String!): [MessageThreadType!]
   threadByUid(uid: String!): MessageThreadType
-  noticeByUid(uid: String!): NoticeType
-  noticesByCreator(uid: String!): [NoticeType!]
-  noticeFilter(groupUid: String, departmentUid: String): [NoticeType!]!
+  noticeByUid(uid: String!): NoticeType @isAuthenticated @hasPermission
+  noticesByCreator(uid: String!): [NoticeType!] @isAuthenticated @hasPermission
+  noticeFilter(groupUid: String, departmentUid: String): [NoticeType!]! @isAuthenticated @hasPermission
   notificationFilter(groupUid: String, departmentUid: String, userUid: String): [NotificationType!]!
   notificationByUid(uid: String!): NotificationType
-  countSampleGroupByStatus: GroupedCounts!
-  countSampleGroupByAction(startDate: String = null, endDate: String = null): GroupedData!
-  countAnalyteGroupByStatus: GroupedCounts!
-  countWorksheetGroupByStatus: GroupedCounts!
-  countExtrasGroupByStatus: GroupedCounts!
-  countAnalyteGroupByInstrument(startDate: String = null, endDate: String = null): GroupedCounts!
-  sampleProcessPerformance(startDate: String!, endDate: String!): ProcessStatistics!
-  analysisProcessPerformance(process: String!, startDate: String!, endDate: String!): ProcessStatistics!
-  sampleLaggards: LaggardStatistics!
+  countSampleGroupByStatus: GroupedCounts! @isAuthenticated @hasPermission
+  countSampleGroupByAction(startDate: String = null, endDate: String = null): GroupedData! @isAuthenticated @hasPermission
+  countAnalyteGroupByStatus: GroupedCounts! @isAuthenticated @hasPermission
+  countWorksheetGroupByStatus: GroupedCounts! @isAuthenticated @hasPermission
+  countExtrasGroupByStatus: GroupedCounts! @isAuthenticated @hasPermission
+  countAnalyteGroupByInstrument(startDate: String = null, endDate: String = null): GroupedCounts! @isAuthenticated @hasPermission
+  sampleProcessPerformance(startDate: String!, endDate: String!): ProcessStatistics! @isAuthenticated @hasPermission
+  analysisProcessPerformance(process: String!, startDate: String!, endDate: String!): ProcessStatistics! @isAuthenticated @hasPermission
+  sampleLaggards: LaggardStatistics! @isAuthenticated @hasPermission
   reflexRuleAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): ReflexRuleCursorPage!
   reflexRuleByUid(uid: String!): ReflexRuleType
-  storeRoomAll: [StoreRoomType!]!
-  storeRoomByUid(uid: String!): StoreRoomType
-  storageLocations(storeRoomUid: String!): [StorageLocationType!]!
-  storageLocationByUid(uid: String!): StorageLocationType
-  storageSections(storageLocationUid: String!): [StorageSectionType!]!
-  storageSectionByUid(uid: String!): StorageSectionType
-  storageContainers(storageSectionUid: String!): [StorageContainerType!]!
-  storageContainerByUid(uid: String!): StorageContainerType
-  stockItemAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): StockItemCursorPage!
-  stockItemByUid(uid: String!): StockItemType
-  stockItemVariants(stockItemUid: String!): [StockItemVariantType!]!
-  stockProductAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): StockItemVariantCursorPage!
-  stockProductByUid(uid: String!): StockItemVariantType
-  stockLots(productUid: String!): [StockLotType!]!
+  storeRoomAll: [StoreRoomType!]! @isAuthenticated @hasPermission
+  storeRoomByUid(uid: String!): StoreRoomType @isAuthenticated @hasPermission
+  storageLocations(storeRoomUid: String!): [StorageLocationType!]! @isAuthenticated @hasPermission
+  storageLocationByUid(uid: String!): StorageLocationType @isAuthenticated @hasPermission
+  storageSections(storageLocationUid: String!): [StorageSectionType!]! @isAuthenticated @hasPermission
+  storageSectionByUid(uid: String!): StorageSectionType @isAuthenticated @hasPermission
+  storageContainers(storageSectionUid: String!): [StorageContainerType!]! @isAuthenticated @hasPermission
+  storageContainerByUid(uid: String!): StorageContainerType @isAuthenticated @hasPermission
+  stockItemAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): StockItemCursorPage! @isAuthenticated @hasPermission
+  stockItemByUid(uid: String!): StockItemType @isAuthenticated @hasPermission
+  stockItemVariants(stockItemUid: String!): [StockItemVariantType!]! @isAuthenticated @hasPermission
+  stockProductAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): StockItemVariantCursorPage! @isAuthenticated @hasPermission
+  stockProductByUid(uid: String!): StockItemVariantType @isAuthenticated @hasPermission
+  stockLots(productUid: String!): [StockLotType!]! @isAuthenticated @hasPermission
   stockCategoryAll: [StockCategoryType!]!
   stockCategoryByUid(uid: String!): StockCategoryType
   hazardAll: [HazardType!]!
   hazardByUid(uid: String!): HazardType
   stockUnitAll: [StockUnitType!]!
   stockUnitByUid(uid: String!): StockUnitType
-  stockProductInventory(productUid: String!, stockLotUid: String!): StockProductInventoryType
-  stockOrderAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, status: String = null, text: String = null, sortBy: [String!] = null): StockOrderCursorPage!
-  stockOrderByUid(uid: String!): StockOrderType
-  stockOrderProductAll(stockOrderUid: String!): [StockOrderProductType!]!
-  stockOrderProductByUid(uid: String!): StockOrderProductType
-  stockReceipt(productUid: String!, stockLotUid: String!): [StockReceiptType!]!
-  stockAdjustmentAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null, productUid: String = null): StockAdjustmentCursorPage!
-  stockAdjustmentByUid(uid: String!): StockAdjustmentType
+  stockProductInventory(productUid: String!, stockLotUid: String!): [StockProductInventoryType!]! @isAuthenticated @hasPermission
+  stockOrderAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, status: String = null, text: String = null, sortBy: [String!] = null): StockOrderCursorPage! @isAuthenticated @hasPermission
+  stockOrderByUid(uid: String!): StockOrderType @isAuthenticated @hasPermission
+  stockOrderProductAll(stockOrderUid: String!): [StockOrderProductType!]! @isAuthenticated @hasPermission
+  stockOrderProductByUid(uid: String!): StockOrderProductType @isAuthenticated @hasPermission
+  stockReceipt(productUid: String!, stockLotUid: String!): [StockReceiptType!]! @isAuthenticated @hasPermission
+  stockAdjustmentAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null, productUid: String = null): StockAdjustmentCursorPage! @isAuthenticated @hasPermission
+  stockAdjustmentByUid(uid: String!): StockAdjustmentType @isAuthenticated @hasPermission
   impressReportsMeta(uids: [String!]!): [ReportImpressType!]!
   impressReportsDownload(sampleIds: [String!]!): BytesScalar
   impressReportDownload(uid: String!): BytesScalar
@@ -2076,29 +5127,143 @@ type Query {
   instrumentByUid(uid: String!): InstrumentType!
   laboratoryInstrumentByUid(uid: String!): LaboratoryInstrumentType!
   methodByUid(uid: String!): MethodType!
-  shipmentAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, incoming: Boolean! = false, status: String = null, sortBy: [String!] = null): ShipmentCursorPage!
-  shipmentByUid(shipmentUid: String!): ShipmentType!
-  shipmentById(shipmentId: String!): ShipmentType!
-  shipmentByStatus(shipmentStatus: String!): [ShipmentType!]!
+  instrumentResultExclusions(instrumentUid: String!): [InstrumentResultExclusionsType!]!
+  instrumentResultTranslations(instrumentUid: String!): [InstrumentResultTranslationType!]!
+  shipmentAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, incoming: Boolean! = false, status: String = null, sortBy: [String!] = null): ShipmentCursorPage! @isAuthenticated @hasPermission
+  shipmentByUid(shipmentUid: String!): ShipmentType! @isAuthenticated @hasPermission
+  shipmentById(shipmentId: String!): ShipmentType! @isAuthenticated @hasPermission
+  shipmentByStatus(shipmentStatus: String!): [ShipmentType!]! @isAuthenticated @hasPermission
   referralLaboratoryAll: [ReferralLaboratoryType!]!
   referralLaboratoryByUid(uid: String!): ReferralLaboratoryType!
   referralLaboratoryByCode(code: String!): ReferralLaboratoryType!
-  manifestReportDownload(uid: String!): BytesScalar
-  bills(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, isActive: Boolean = null, partial: Boolean = null, clientUid: String = null, sortBy: [String!] = null): TestBillCursorPage!
-  billByUid(uid: String!): TestBillType
-  billsForPatient(patientUid: String!): [TestBillType!]
-  billsForClient(clientUid: String!): [TestBillType!]
-  billTransactions(billUid: String!): [TestBillTransactionType!]
-  billInvoices(billUid: String!): [TestBillInvoiceType!]
-  billInvoice(invoiceUid: String!): TestBillInvoiceType
-  billInvoiceCreate(billUid: String!): BytesScalar
-  priceForProfile(profileUid: String!): ProfilePriceType
-  priceForAnalysis(analysisUid: String!): AnalysisPriceType
-  discountForProfile(profileUid: String!): ProfileDiscountType
-  discountForAnalysis(analysisUid: String!): AnalysisDiscountType
-  voucherAll: [VoucherType!]
-  voucherByUid(uid: String!): VoucherType
-  voucherCodes(voucherUid: String!): [VoucherCodeType!]
+  manifestReportDownload(uid: String!): BytesScalar @isAuthenticated @hasPermission
+  bills(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, isActive: Boolean = null, partial: Boolean = null, clientUid: String = null, sortBy: [String!] = null): TestBillCursorPage! @isAuthenticated @hasPermission
+  ordersByBillUid(uid: String!): [AnalysisRequestType!]! @isAuthenticated @hasPermission
+  billByUid(uid: String!): TestBillType @isAuthenticated @hasPermission
+  billsForPatient(patientUid: String!): [TestBillType!] @isAuthenticated @hasPermission
+  billsForClient(clientUid: String!): [TestBillType!] @isAuthenticated @hasPermission
+  billTransactions(billUid: String!): [TestBillTransactionType!] @isAuthenticated @hasPermission
+  billInvoices(billUid: String!): [TestBillInvoiceType!] @isAuthenticated @hasPermission
+  billInvoice(invoiceUid: String!): TestBillInvoiceType @isAuthenticated @hasPermission
+  billInvoiceCreate(billUid: String!): BytesScalar @isAuthenticated @hasPermission
+  priceForProfile(profileUid: String!): ProfilePriceType @isAuthenticated @hasPermission
+  priceForAnalysis(analysisUid: String!): AnalysisPriceType @isAuthenticated @hasPermission
+  discountForProfile(profileUid: String!): ProfileDiscountType @isAuthenticated @hasPermission
+  discountForAnalysis(analysisUid: String!): AnalysisDiscountType @isAuthenticated @hasPermission
+  voucherAll: [VoucherType!] @isAuthenticated @hasPermission
+  voucherByUid(uid: String!): VoucherType @isAuthenticated @hasPermission
+  voucherCodes(voucherUid: String!): [VoucherCodeType!] @isAuthenticated @hasPermission
+  abxGuidelinesAll: [AbxGuidelineType!]
+  abxGuidelineByUid(uid: String!): AbxGuidelineType
+  abxAntibioticAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxAntibioticCursorPage!
+  abxAntibioticByUid(uid: String!): AbxAntibioticType
+  abxLaboratoryAntibiotics: [AbxAntibioticType!]
+  abxKingdomAll: [AbxKingdomType!]
+  abxKingdomByUid(uid: String!): AbxKingdomType
+  abxPhylumAll: [AbxPhylumType!]
+  abxPhylumByUid(uid: String!): AbxPhylumType
+  abxClassAll: [AbxClassType!]
+  abxClassByUid(uid: String!): AbxClassType
+  abxOrderAll: [AbxOrderType!]
+  abxOrderByUid(uid: String!): AbxOrderType
+  abxFamilyAll: [AbxFamilyType!]
+  abxFamilyByUid(uid: String!): AbxFamilyType
+  abxGenusAll: [AbxGenusType!]
+  abxGenusByUid(uid: String!): AbxGenusType
+  abxOrganismAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxOrganismCursorPage!
+  abxOrganismByUid(uid: String!): AbxOrganismType
+  abxOrganismResultAll(analysisResultUid: String!): [AbxOrganismResultType!]
+  abxOrganismSerotypeAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxOrganismSerotypeCursorPage!
+  abxOrganismSerotypeByUid(uid: String!): AbxOrganismSerotypeType
+  abxTestMethodAll: [AbxTestMethodType!]
+  abxTestMethodByUid(uid: String!): AbxTestMethodType
+  abxBreakpointTypeAll: [AbxBreakpointTypeTyp!]
+  abxBreakpointTypeByUid(uid: String!): AbxBreakpointTypeTyp
+  abxHostAll: [AbxHostType!]
+  abxHostByUid(uid: String!): AbxHostType
+  abxSiteOfInfectionAll: [AbxSiteOfInfectionType!]
+  abxSiteOfInfectionByUid(uid: String!): AbxSiteOfInfectionType
+  abxGuidelineYearAll: [AbxGuidelineYearType!]
+  abxBreakpointAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxBreakpointTypCursorPage!
+  abxBreakpointByUid(uid: String!): AbxBreakpointTyp
+  abxExpectedResistancePhenotypeAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxExpResPhenotypeCursorPage!
+  abxExpectedResistancePhenotypeByUid(uid: String!): AbxExpResPhenotypeType
+  abxExpertInterpretationRuleAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxExpertInterpretationRuleCursorPage!
+  abxExpertInterpretationRuleByUid(uid: String!): AbxExpertInterpretationRuleType
+  abxMediumAll: [AbxMediumType!]
+  abxMediumByUid(uid: String!): AbxMediumType
+  abxQcRangeAll(text: String!, pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, sortBy: [String!] = null): AbxQCRangeCursorPage!
+  abxQcRangeByUid(uid: String!): AbxQCRangeType
+  abxAstPanelAll: [AbxASTPanelType!]
+  abxAstPanelFilter(organismUid: String!, text: String! = ""): [AbxASTPanelType!]
+  abxAstPanelByUid(uid: String!): AbxASTPanelType
+  abxAstResultAll(sampleUid: String!): [AbxASTResultType!]
+  grindSchemeAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): GrindSchemeCursorPage! @isAuthenticated @hasPermission
+  grindSchemeByUid(uid: String!): GrindSchemeType @isAuthenticated @hasPermission
+  grindBoardAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, schemeUid: String = null, sortBy: [String!] = null): GrindBoardCursorPage! @isAuthenticated @hasPermission
+  grindBoardByUid(uid: String!): GrindBoardType @isAuthenticated @hasPermission
+  grindBoardsByScheme(schemeUid: String!): [GrindBoardType!]! @isAuthenticated @hasPermission
+  grindPosterAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, boardUid: String = null, category: String = null, status: String = null, sortBy: [String!] = null): GrindPosterCursorPage! @isAuthenticated @hasPermission
+  grindPosterByUid(uid: String!): GrindPosterType @isAuthenticated @hasPermission
+  grindPostersByBoard(boardUid: String!): [GrindPosterType!]! @isAuthenticated @hasPermission
+  grindErrandAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, posterUid: String = null, category: String = null, priority: String = null, assigneeUid: String = null, reporterUid: String = null, sortBy: [String!] = null): GrindErrandCursorPage! @isAuthenticated @hasPermission
+  grindErrandByUid(uid: String!): GrindErrandType @isAuthenticated @hasPermission
+  grindErrandsByPoster(posterUid: String!): [GrindErrandType!]! @isAuthenticated @hasPermission
+  grindErrandsByAssignee(assigneeUid: String!): [GrindErrandType!]! @isAuthenticated @hasPermission
+  grindLabelAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): GrindLabelCursorPage! @isAuthenticated @hasPermission
+  grindLabelByUid(uid: String!): GrindLabelType @isAuthenticated @hasPermission
+  grindLabelsByCategory(category: String!): [GrindLabelType!]! @isAuthenticated @hasPermission
+  grindStampAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): GrindStampCursorPage! @isAuthenticated @hasPermission
+  grindStampByUid(uid: String!): GrindStampType @isAuthenticated @hasPermission
+  grindStampByCategory(category: StampCategory!): [GrindStampType!]! @isAuthenticated @hasPermission
+  grindMediaAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, target: String = null, targetUid: String = null, sortBy: [String!] = null): GrindMediaCursorPage! @isAuthenticated @hasPermission
+  grindMediaByUid(uid: String!): GrindMediaType @isAuthenticated @hasPermission
+  grindMediaByTarget(target: String!, targetUid: String!): [GrindMediaType!]! @isAuthenticated @hasPermission
+  grindMilestoneAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, errandUid: String = null, complete: Boolean = null, assigneeUid: String = null, sortBy: [String!] = null): GrindMilestoneCursorPage! @isAuthenticated @hasPermission
+  grindMilestoneByUid(uid: String!): GrindMilestoneType @isAuthenticated @hasPermission
+  grindMilestonesByErrand(errandUid: String!): [GrindMilestoneType!]! @isAuthenticated @hasPermission
+  grindMilestonesByAssignee(assigneeUid: String!): [GrindMilestoneType!]! @isAuthenticated @hasPermission
+  grindOccurrenceAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, target: String = null, targetUid: String = null, actorUid: String = null, sortBy: [String!] = null): GrindOccurrenceCursorPage! @isAuthenticated @hasPermission
+  grindOccurrenceByUid(uid: String!): GrindOccurrenceType @isAuthenticated @hasPermission
+  grindOccurrencesByTarget(target: String!, targetUid: String!): [GrindOccurrenceType!]! @isAuthenticated @hasPermission
+  grindOccurrencesByActor(actorUid: String!): [GrindOccurrenceType!]! @isAuthenticated @hasPermission
+  grindErrandDiscussions(errandUid: String!): [GrindErrandDiscussionType!]! @isAuthenticated @hasPermission
+  grindErrandDiscussionsByParent(parentUid: String!): [GrindErrandDiscussionType!]! @isAuthenticated @hasPermission
+  downloadGrindMediaFileUrl(uid: String!): FileUrlResponseType!
+  downloadGrindMediaFile(uid: String!): FileResponseType!
+  documentCategoryByUid(uid: String!): DocumentCategoryType @isAuthenticated @hasPermission
+  documentTagAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, sortBy: [String!] = null): DocumentTagCursorPage! @isAuthenticated @hasPermission
+  documentTagByUid(uid: String!): DocumentTagType @isAuthenticated @hasPermission
+  documentFolderAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, parentUid: String = null, sortBy: [String!] = null): DocumentFolderCursorPage! @isAuthenticated @hasPermission
+  documentFolderByUid(uid: String!): DocumentFolderType @isAuthenticated @hasPermission
+  documentRootFolders: [DocumentFolderType!]! @isAuthenticated @hasPermission
+  documentTemplateAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, categoryUid: String = null, sortBy: [String!] = null): DocumentTemplateCursorPage! @isAuthenticated @hasPermission
+  documentTemplateByUid(uid: String!): DocumentTemplateType @isAuthenticated @hasPermission
+  documentAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, text: String = null, folderUid: String = null, categoryUid: String = null, departmentUid: String = null, tagUid: String = null, status: String = null, authorUid: String = null, readerUid: String = null, sortBy: [String!] = null): DocumentCursorPage! @isAuthenticated @hasPermission
+  documentByUid(uid: String!): DocumentType @isAuthenticated @hasPermission
+  documentByDocumentId(documentId: String!): DocumentType @isAuthenticated @hasPermission
+  documentVersionAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, documentUid: String = null, sortBy: [String!] = null): DocumentVersionCursorPage! @isAuthenticated @hasPermission
+  documentVersionByUid(uid: String!): DocumentVersionType @isAuthenticated @hasPermission
+  documentVersionsByDocument(documentUid: String!): [DocumentVersionType!]! @isAuthenticated @hasPermission
+  documentStatusAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, documentUid: String = null, status: String = null, sortBy: [String!] = null): DocumentStatusCursorPage! @isAuthenticated @hasPermission
+  documentStatusByUid(uid: String!): DocumentStatusType @isAuthenticated @hasPermission
+  documentStatusesByDocument(documentUid: String!): [DocumentStatusType!]! @isAuthenticated @hasPermission
+  documentReviewCycleAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, documentUid: String = null, status: String = null, initiatedByUid: String = null, sortBy: [String!] = null): DocumentReviewCycleCursorPage! @isAuthenticated @hasPermission
+  documentReviewCycleByUid(uid: String!): DocumentReviewCycleType @isAuthenticated @hasPermission
+  documentReviewCyclesByDocument(documentUid: String!): [DocumentReviewCycleType!]! @isAuthenticated @hasPermission
+  documentReviewStepAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, reviewCycleUid: String = null, reviewerUid: String = null, status: String = null, sortBy: [String!] = null): DocumentReviewStepCursorPage! @isAuthenticated @hasPermission
+  documentReviewStepByUid(uid: String!): DocumentReviewStepType @isAuthenticated @hasPermission
+  documentReviewStepsByCycle(reviewCycleUid: String!): [DocumentReviewStepType!]! @isAuthenticated @hasPermission
+  documentReviewStepsByReviewer(reviewerUid: String!): [DocumentReviewStepType!]! @isAuthenticated @hasPermission
+  documentSubscriptionAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, documentUid: String = null, userUid: String = null, subscriptionType: String = null, sortBy: [String!] = null): DocumentSubscriptionCursorPage! @isAuthenticated @hasPermission
+  documentSubscriptionByUid(uid: String!): DocumentSubscriptionType @isAuthenticated @hasPermission
+  documentSubscriptionsByDocument(documentUid: String!): [DocumentSubscriptionType!]! @isAuthenticated @hasPermission
+  documentSubscriptionsByUser(userUid: String!): [DocumentSubscriptionType!]! @isAuthenticated @hasPermission
+  documentAuditAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, documentUid: String = null, userUid: String = null, action: String = null, sortBy: [String!] = null): DocumentAuditCursorPage! @isAuthenticated @hasPermission
+  documentAuditByUid(uid: String!): DocumentAuditType @isAuthenticated @hasPermission
+  documentAuditsByDocument(documentUid: String!): [DocumentAuditType!]! @isAuthenticated @hasPermission
+  smsTemplatesByTarget(targetType: String!, targetUid: String!): [SmsTemplateType!]!
+  smsAll(pageSize: Int = null, afterCursor: String = null, beforeCursor: String = null, status: String = null, audience: String = null, sortBy: [String!] = null): SmsMessageCursorPage!
 }
 
 input ReferenceSampleInput {
@@ -2129,6 +5294,8 @@ type ReferralLaboratoryType {
   password: String
   isReference: Boolean
   isReferral: Boolean
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2158,6 +5325,8 @@ type ReflexActionType {
   reflexRuleUid: String!
   reflexRule: ReflexRuleType
   brains: [ReflexBrainType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2184,6 +5353,8 @@ type ReflexBrainActionType {
   addNew: [ReflexBrainAdditionType!]
   finalise: [ReflexBrainFinalType!]
   priority: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2198,6 +5369,8 @@ type ReflexBrainAdditionType {
   reflexBrainActionUid: String!
   reflexBrainAction: ReflexBrainActionType
   count: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 type ReflexBrainConditionCriteriaType {
@@ -2207,6 +5380,8 @@ type ReflexBrainConditionCriteriaType {
   reflexBrainCondition: ReflexBrainConditionType
   operator: String!
   value: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 input ReflexBrainConditionInput {
@@ -2222,6 +5397,8 @@ type ReflexBrainConditionType {
   description: String
   criteria: [ReflexBrainConditionCriteriaType!]
   priority: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 input ReflexBrainCriteriaInput {
@@ -2236,6 +5413,8 @@ type ReflexBrainFinalType {
   reflexBrainActionUid: String!
   reflexBrainAction: ReflexBrainActionType
   value: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 input ReflexBrainInput {
@@ -2257,6 +5436,8 @@ type ReflexBrainType {
   uid: String!
   description: String!
   priority: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2297,6 +5478,8 @@ type ReflexRuleType {
   reflexActions: [ReflexActionType!]
   isActive: Boolean!
   priority: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2311,6 +5494,8 @@ union RejectionReasonResponse = RejectionReasonType | OperationError
 type RejectionReasonType {
   uid: String!
   reason: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2330,6 +5515,8 @@ type ReportImpressType {
   smsSent: Boolean
   generatedByUid: String
   generatedBy: UserType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: DateTime!
@@ -2349,6 +5536,8 @@ type ReportMetaType {
   status: String
   temp: String
   analyses: [AnalysisType!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2373,12 +5562,19 @@ type ResultMutationType {
   after: String!
   mutation: String!
   date: String
+  laboratoryUid: String
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+}
+
+type ResultOperationType {
+  isBackground: Boolean!
+  results: [AnalysisResultType!]
+  message: String
 }
 
 input ResultOptionInputType {
@@ -2397,6 +5593,8 @@ type ResultOptionType {
   value: String!
   analysisUid: String!
   sampleTypes: [SampleTypeTyp!]
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2413,7 +5611,7 @@ type ResultedSampleListingType {
 }
 
 """Union of possible outcomes when actioning samples"""
-union SampleActionResponse = SampleListingType | OperationError
+union SampleActionResponse = SampleListingType | OperationSuccess | OperationError
 
 type SampleCursorPage {
   pageInfo: PageInfo!
@@ -2429,6 +5627,7 @@ type SampleEdge {
 
 type SampleListingType {
   samples: [SampleType!]!
+  message: String
 }
 
 input SamplePublishInputType {
@@ -2492,6 +5691,8 @@ type SampleType {
   dateStored: DateTime
   dateRetrievedFromStorage: DateTime
   metadataSnapshot: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2531,6 +5732,8 @@ type SampleTypeMappingType {
   name: String
   description: String
   code: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2549,6 +5752,8 @@ type SampleTypeTyp {
   active: Boolean!
   internalUse: Boolean!
   abbr: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2607,6 +5812,8 @@ type SamplesWithResults {
   dateStored: DateTime
   dateRetrievedFromStorage: DateTime
   metadataSnapshot: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -2660,7 +5867,7 @@ type ShipmentType {
   state: String
   incoming: Boolean!
   laboratoryUid: String
-  laboratory: ReferralLaboratoryType
+  laboratory: LaboratoryType
   jsonContent: JSONScalar
   pdfContent: BytesScalar
   finalisedByUid: String
@@ -2705,6 +5912,97 @@ type ShippedSampleType {
   resultNotified: Boolean
   extSampleUid: String
   extSampleId: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+}
+
+enum SmsAudience {
+  PATIENT
+  CLIENT
+}
+
+type SmsMessageCursorPage {
+  pageInfo: PageInfo!
+  edges: [SmsMessageEdge!]
+  items: [SmsMessageType!]
+  totalCount: Int!
+}
+
+type SmsMessageEdge {
+  cursor: String!
+  node: SmsMessageType!
+}
+
+type SmsMessageType {
+  uid: String!
+  templateUid: String
+  recipient: String
+  message: String
+  status: String
+  sentAt: DateTime
+  targetType: String
+  targetUid: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+input SmsTemplateInputType {
+  """Category name"""
+  name: String!
+  template: String!
+  description: String!
+  targetType: String!
+  targetUid: String!
+  specificationTrigger: SmsTrigger! = ANY_ABNORMAL
+  audience: SmsAudience! = PATIENT
+  isActive: Boolean! = true
+}
+
+"""Response for Sms Template operations"""
+union SmsTemplateResponse = SmsTemplateType | OperationError
+
+type SmsTemplateType {
+  uid: String!
+  name: String
+  template: String
+  description: String
+  targetType: String
+  targetUid: String
+  specificationTrigger: SmsTrigger
+  audience: SmsAudience
+  isActive: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
+  createdAt: String
+  createdByUid: String
+  createdBy: UserType
+  updatedAt: String
+  updatedByUid: String
+  updatedBy: UserType
+}
+
+enum SmsTrigger {
+  NORMAL
+  BELOW_NORMAL
+  ABOVE_NORMAL
+  BELOW_WARNING
+  ABOVE_WARNING
+  ANY_ABNORMAL
+  ANY_WARNING
+  ANY_RESULT
+  TEXTUAL_NORMAL
+  TEXTUAL_WARNING
+}
+
+enum StampCategory {
+  PROJECT
+  TICKET
 }
 
 type StockAdjustmentCursorPage {
@@ -2744,6 +6042,8 @@ type StockAdjustmentType {
   adjustmentBy: UserType
   adjustmentForUid: String
   adjustmentFor: UserType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2764,6 +6064,8 @@ type StockCategoryType {
   uid: String!
   name: String!
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2806,6 +6108,8 @@ type StockItemType {
   minimumLevel: Int
   maximumLevel: Int
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2845,6 +6149,8 @@ type StockItemVariantType {
   minimumLevel: Int
   maximumLevel: Int
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2862,6 +6168,8 @@ type StockLotType {
   expiryDate: DateTime!
   remarks: String
   quantity: Int!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 input StockOrderApprovalInputType {
@@ -2908,6 +6216,8 @@ type StockOrderProductType {
   orderUid: String
   order: StockOrderType
   quantity: Int
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2930,6 +6240,8 @@ type StockOrderType {
   status: String
   remarks: String
   orderNumber: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2941,6 +6253,8 @@ type StockOrderType {
 type StockPackagingType {
   uid: String!
   name: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -2957,6 +6271,8 @@ type StockProductInventoryType {
   stockLot: StockLotType
   quantity: Int!
   remarks: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 input StockReceiptInputType {
@@ -2996,6 +6312,8 @@ type StockReceiptType {
   receiptByUid: String!
   receiptBy: UserType
   receiptDate: DateTime!
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 type StockTransactionCursorPage {
@@ -3028,6 +6346,8 @@ type StockTransactionType {
   updatedAt: String
   updatedByUid: String
   updatedBy: UserType
+  laboratoryUid: String
+  laboratory: LaboratoryType
 }
 
 input StockUnitInputType {
@@ -3042,6 +6362,8 @@ type StockUnitType {
   name: String!
   description: String!
   synonyms: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3070,6 +6392,8 @@ type StorageContainerType {
   description: String
   storageSectionUid: String!
   storageSection: StorageSectionType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   grid: Boolean
   rowWise: Boolean
   cols: Int
@@ -3100,6 +6424,8 @@ type StorageLocationType {
   description: String
   storeRoomUid: String!
   storeRoom: StoreRoomType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3125,6 +6451,8 @@ type StorageSectionType {
   description: String
   storageLocationUid: String!
   storageLocation: StorageLocationType
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3147,6 +6475,8 @@ type StoreRoomType {
   uid: String!
   name: String!
   description: String
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3201,6 +6531,14 @@ type SupplierType {
   updatedAt: String
 }
 
+type SurgicalHistoryType {
+  procedure: String!
+  cptCode: String
+  date: String
+  facility: String
+  complications: String
+}
+
 type TestBillCursorPage {
   pageInfo: PageInfo!
   edges: [TestBillEdge!]
@@ -3219,6 +6557,8 @@ type TestBillInvoiceType {
   testBill: TestBillType!
   jsonContent: JSONScalar
   pdfContent: BytesScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3242,6 +6582,8 @@ type TestBillTransactionType {
   notes: String!
   message: String!
   actionMessage: String!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3263,6 +6605,8 @@ type TestBillType {
   totalCharged: Float!
   totalPaid: Float!
   jsonContent: JSONScalar
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3270,6 +6614,15 @@ type TestBillType {
   updatedByUid: String
   updatedBy: UserType
   orders: [AnalysisRequestType!]
+}
+
+type TravelHistoryType {
+  destinationCountry: String!
+  destinationCity: String
+  startDate: String
+  endDate: String
+  purpose: String
+  exposures: String
 }
 
 input UnitInputType {
@@ -3304,6 +6657,19 @@ type UpdatedGroupPerms {
 """"""
 union UpdatedGroupPermsResponse = UpdatedGroupPerms | OperationError
 
+scalar Upload
+
+type UserAccessSummaryType {
+  user: UserType!
+  laboratories: [String!]!
+  activeLaboratory: String
+  groups: [GroupType!]!
+  permissions: [PermissionType!]!
+  isActive: Boolean!
+  isBlocked: Boolean!
+  isSuperuser: Boolean!
+}
+
 type UserCursorPage {
   pageInfo: PageInfo!
   edges: [UserEdge!]
@@ -3314,6 +6680,15 @@ type UserCursorPage {
 type UserEdge {
   cursor: String!
   node: UserType!
+}
+
+""""""
+union UserLaboratoryAssignmentResponse = UserLaboratoryAssignmentType | OperationError
+
+type UserLaboratoryAssignmentType {
+  user: UserType!
+  laboratories: [String!]!
+  message: String!
 }
 
 type UserPreferenceType {
@@ -3349,12 +6724,14 @@ type UserType {
   userName: String!
   loginRetry: Int!
   isBlocked: Boolean!
+  activeLaboratoryUid: String
   createdByUid: String
   createdBy: UserType
   createdAt: String
   updatedByUid: String
   updatedBy: UserType
   updatedAt: String
+  laboratories: [String!]!
 }
 
 input VoucherCodeInput {
@@ -3375,6 +6752,8 @@ type VoucherCodeType {
   usageLimit: Int!
   used: Int!
   isActive: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String!
   createdByUid: String
   createdBy: UserType
@@ -3389,6 +6768,8 @@ type VoucherCustomerType {
   patient: PatientType!
   voucherCodeUid: String!
   voucherCode: VoucherCodeType!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3418,6 +6799,8 @@ type VoucherType {
   endDate: String!
   oncePerCustomer: Boolean!
   oncePerOrder: Boolean!
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdAt: String
   createdByUid: String
   createdBy: UserType
@@ -3465,6 +6848,8 @@ type WorkSheetTemplateType {
   instrument: InstrumentType
   sampleTypeUid: String
   sampleType: SampleTypeTyp
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String
@@ -3501,6 +6886,8 @@ type WorkSheetType {
   verifiedByUid: String
   verifiedBy: UserType
   dateVerified: DateTime
+  laboratoryUid: String
+  laboratory: LaboratoryType
   createdByUid: String
   createdBy: UserType
   createdAt: String

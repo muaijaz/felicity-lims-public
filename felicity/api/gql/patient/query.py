@@ -4,11 +4,13 @@ import strawberry  # noqa
 from strawberry.permission import PermissionExtension
 
 from felicity.api.gql.patient.types import (
+    AllergyType,
     ClinicalDiagnosisType,
     GuarantorType,
     IdentificationType,
     InsuranceCompanyType,
     InsuranceValidationType,
+    MedicationType,
     PatientCursorPage,
     PatientEdge,
     PatientInsuranceType,
@@ -144,16 +146,18 @@ class PatientQuery:
             permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
         )]
     )
-    async def active_medications(self, info, patient_uid: str) -> List[dict]:
-        return await PatientMedicalHistoryService().get_active_medications(patient_uid)
+    async def active_medications(self, info, patient_uid: str) -> List[MedicationType]:
+        medications = await PatientMedicalHistoryService().get_active_medications(patient_uid)
+        return [MedicationType(**med) for med in medications] if medications else []
 
     @strawberry.field(
         extensions=[PermissionExtension(
             permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
         )]
     )
-    async def verified_allergies(self, info, patient_uid: str) -> List[dict]:
-        return await PatientMedicalHistoryService().get_verified_allergies(patient_uid)
+    async def verified_allergies(self, info, patient_uid: str) -> List[AllergyType]:
+        allergies = await PatientMedicalHistoryService().get_verified_allergies(patient_uid)
+        return [AllergyType(**allergy) for allergy in allergies] if allergies else []
 
     # Insurance Queries
 
