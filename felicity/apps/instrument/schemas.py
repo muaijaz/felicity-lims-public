@@ -110,7 +110,7 @@ class LaboratoryInstrumentBase(BaseModel):
     is_active: Optional[bool] = False
     host: Optional[str] = None
     port: Optional[int] = None
-    auto_reconnect: bool
+    auto_reconnect: Optional[bool] = False  # Fixed: made optional with default for seed data compatibility
     protocol_type: Optional[str] = None
     socket_type: Optional[str] = None
     connection: Optional[str] = None

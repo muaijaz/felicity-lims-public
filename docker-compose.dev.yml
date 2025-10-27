@@ -47,6 +47,8 @@ services:
       context: ./
       target: webapi
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     environment:
       # Database and service connection details for containerized services.
       # Services communicate using their service names within the Docker network.
@@ -55,7 +57,7 @@ services:
       POSTGRES_USER: felicity
       POSTGRES_PASSWORD: felicity
       POSTGRES_HOST_AUTH_METHOD: trust # Acceptable for development
-      LOAD_SETUP_DATA: ${LOAD_SETUP_DATA:-False}
+      LOAD_SETUP_DATA: ${LOAD_SETUP_DATA:-True}
       SERVE_WEBAPP: ${SERVE_WEBAPP:-False}
       REDIS_SERVER: redis://felicity-dragonfly:6379
       MONGODB_SERVER: felicity-mongo:27017
@@ -66,6 +68,11 @@ services:
       # Use consistent environment variable names for MinIO
       MINIO_ACCESS: felicity # Hardcoded for dev, consider .env for consistency
       MINIO_SECRET: felicity # Hardcoded for dev, consider .env for consistency
+      # Fix for OTLP tracing and URL validation
+      RUN_OPEN_TRACING: "False"
+      OTLP_SPAN_EXPORT_URL: "http://localhost:4317"
+      SERVER_HOST: "http://localhost"
+      DOMAIN: "localhost"
     volumes:
       - ./felicity:/app/felicity # Mount local API code for live reloading
       - felicity_media:/app/felicity/media # Mount volume for media uploads
@@ -85,7 +92,7 @@ services:
 
   felicity-minio:
     container_name: felicity-minio
-    image: bitnami/minio:2024.7.31 # Pinning image version
+    image: minio/minio:latest # Official MinIO image for ARM compatibility
     restart: unless-stopped # Ensure MinIO restarts if it crashes
     ports:
       - '9000:9000' # Expose MinIO API on host port 9000
@@ -99,7 +106,7 @@ services:
       MINIO_ROOT_USER: felicity
       MINIO_ROOT_PASSWORD: felicity
       MINIO_DEFAULT_BUCKET: felicity
-    command: minio server /data --console-address ":9001" # Start MinIO server with console
+    command: server /data --console-address ":9001" # Start MinIO server with console
     healthcheck: # Health check for MinIO
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -156,6 +163,7 @@ services:
     container_name: felicity-mongo
     image: mongo:7.0.9 # Pinning a specific MongoDB version for stability
     restart: unless-stopped # Ensure MongoDB restarts if it crashes (changed from always to unless-stopped)
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
     environment:
       # MongoDB root credentials (hardcoded for dev, consider .env for consistency)
       MONGO_INITDB_ROOT_USERNAME: felicity
@@ -174,7 +182,7 @@ services:
 
   felicity-dbgate:
     container_name: felicity-dbgate
-    image: dbgate/dbgate:1.50.0 # Pinning image version (example, check latest stable)
+    image: dbgate/dbgate:latest # Using latest version for ARM compatibility
     restart: always
     ports:
       - 8051:3000 # Expose DbGate on host port 8051
@@ -197,7 +205,7 @@ services:
       LABEL_mg: Felicity Mongo
       # Connects to containerized Mongo service by name (hardcoded for dev, consider .env for consistency)
       URL_mg: mongodb://felicity:felicity@felicity-mongo:27017/
-      DATABASE_mg: felicity
+      DATABASE_mg: felicity_lims
       ENGINE_mg: mongo@dbgate-plugin-mongo
       READONLY_mg: 1 # Set MongoDB connection as read-only in DbGate
     networks:
@@ -207,13 +215,13 @@ services:
       - felicity-postgres
       - felicity-mongo
 
-  word-processor-server:
-    image: syncfusion/word-processor-server:25.1.42 # Pinning image version (example, check latest stable)
-    restart: unless-stopped
-    environment:
-      # Syncfusion license key (hardcoded for dev, consider .env for consistency)
-      SYNCFUSION_LICENSE_KEY:  ${SYNCFUSION_LICENSE} 
-    ports:
-      - "6002:80" # Expose Word Processor Server on host port 6002
-    networks:
-      - felicitynet # Connect to the custom network
+  # word-processor-server:
+  #   image: syncfusion/word-processor-server:25.1.42 # Pinning image version (example, check latest stable)
+  #   restart: unless-stopped
+  #   environment:
+  #     # Syncfusion license key (hardcoded for dev, consider .env for consistency)
+  #     SYNCFUSION_LICENSE_KEY:  ${SYNCFUSION_LICENSE}
+  #   ports:
+  #     - "6002:80" # Expose Word Processor Server on host port 6002
+  #   networks:
+  #     - felicitynet # Connect to the custom network

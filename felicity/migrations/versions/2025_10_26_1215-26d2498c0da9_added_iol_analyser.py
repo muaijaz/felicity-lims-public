@@ -53,12 +53,12 @@ def upgrade():
     )
     op.create_index(op.f('ix_instrument_result_translations_uid'), 'instrument_result_translations', ['uid'], unique=False)
     op.create_table('instrument_raw_data',
-    sa.Column('content', mysql.LONGTEXT(), nullable=False),
-    sa.Column('laboratory_instrument_uid', sa.Integer(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=False),  # Changed from mysql.LONGTEXT() for PostgreSQL compatibility
+    sa.Column('laboratory_instrument_uid', sa.String(), nullable=True),  # Changed from sa.Integer() to match laboratory_instrument.uid type
     sa.Column('is_transformed', sa.Boolean(), nullable=False),
     sa.Column('transformation_attempts', sa.Integer(), nullable=False),
     sa.Column('last_transformation_attempt', sa.DateTime(), nullable=True),
-    sa.Column('transformation_error', mysql.LONGTEXT(), nullable=True),
+    sa.Column('transformation_error', sa.Text(), nullable=True),  # Changed from mysql.LONGTEXT() for PostgreSQL compatibility
     sa.Column('laboratory_uid', sa.String(), nullable=True),
     sa.Column('uid', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),

@@ -168,7 +168,7 @@ class InstrumentCompetenceInput:
 @strawberry.input
 class InstrumentResultExclusionsInput:
     instrument_uid: str
-    instrument: InstrumentType
+    # instrument: InstrumentType  # Removed: output types cannot be used in input types
     result: str
     reason: str | None = None
 
@@ -176,7 +176,7 @@ class InstrumentResultExclusionsInput:
 @strawberry.input
 class InstrumentResultTranslationInput:
     instrument_uid: str
-    instrument: InstrumentType
+    # instrument: InstrumentType  # Removed: output types cannot be used in input types
     original: str
     translated: str
     keyword: str

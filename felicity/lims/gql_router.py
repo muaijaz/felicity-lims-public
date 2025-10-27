@@ -42,7 +42,8 @@ class AuthenticatedGraphQLTransportWSHandler(GraphQLTransportWSHandler):
 
         if not isinstance(payload, dict):
             logger.warning("No valid payload in connection_init message")
-            await self.close(4401, "Authentication required")
+            # Accept connection anyway - let subscriptions handle auth
+            await super().handle_connection_init(message)
             return
 
         try:
@@ -50,8 +51,9 @@ class AuthenticatedGraphQLTransportWSHandler(GraphQLTransportWSHandler):
             tenant_context = await self._extract_websocket_context(payload)
 
             if not tenant_context or not tenant_context.is_authenticated:
-                logger.warning("Unauthenticated WebSocket connection attempt")
-                await self.close(4401, "Only accessible to authenticated users")
+                logger.info("WebSocket connection without authentication - subscriptions will require auth")
+                # Still accept the connection, auth will be enforced at subscription level
+                await super().handle_connection_init(message)
                 return
 
             # Set the tenant context for this WebSocket connection
@@ -69,8 +71,9 @@ class AuthenticatedGraphQLTransportWSHandler(GraphQLTransportWSHandler):
             await super().handle_connection_init(message)
 
         except Exception as e:
-            logger.error(f"Error during WebSocket authentication: {str(e)}")
-            await self.close(4500, "Authentication failed")
+            logger.warning(f"Error during WebSocket authentication (non-fatal): {str(e)}")
+            # Still allow connection - auth enforced at subscription level
+            await super().handle_connection_init(message)
             return
 
     async def handle_request(self):

@@ -1,0 +1,196 @@
+# Space City Labs - All-In-One Felicity LIMS Deployment
+# Single command deployment with all databases containerized
+# Usage: docker compose -f docker-compose.scl.yml up -d
+
+networks:
+  felicitynet:
+    driver: bridge
+
+volumes:
+  dragonfly_data:
+  felicity_media:
+  minio_data:
+  postgres_data:
+  mongo_data:
+
+services:
+  # Main Felicity LIMS Application (API + WebApp)
+  felicity-aio:
+    container_name: scl-felicity-aio
+    image: amusendame/felicity-lims:aio-0.2.0
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_SERVER: felicity-postgres
+      SERVE_WEBAPP: "True"
+      REDIS_SERVER: redis://felicity-dragonfly:6379
+      MONGODB_SERVER: felicity-mongo:27017
+      MONGODB_USER: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGODB_PASS: ${MONGO_INITDB_ROOT_PASSWORD}
+      MINIO_SERVER: felicity-minio:9000
+      MINIO_ACCESS: ${MINIO_ROOT_USER}
+      MINIO_SECRET: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "8000:8000"
+    networks:
+      - felicitynet
+    depends_on:
+      felicity-postgres:
+        condition: service_healthy
+      felicity-dragonfly:
+        condition: service_healthy
+      felicity-minio:
+        condition: service_healthy
+      felicity-mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  # PostgreSQL - Primary Database
+  felicity-postgres:
+    container_name: scl-postgres
+    image: postgres:12.18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - felicitynet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # DragonflyDB - Redis-compatible cache
+  felicity-dragonfly:
+    container_name: scl-dragonfly
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    restart: unless-stopped
+    environment:
+      - DFLY_proactor_threads=4
+      - DFLY_maxmemory=1G
+    ulimits:
+      memlock: -1
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonfly_data:/data
+    networks:
+      - felicitynet
+    healthcheck:
+      test: ["CMD-SHELL", "dragonfly-cmd ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # MinIO - S3-compatible object storage
+  felicity-minio:
+    container_name: scl-minio
+    image: minio/minio:latest
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - felicitynet
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # MongoDB - Audit logs and document storage
+  felicity-mongo:
+    container_name: scl-mongo
+    image: mongo:7.0.9
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27027:27017"
+    networks:
+      - felicitynet
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # DbGate - Database administration tool
+  felicity-dbgate:
+    container_name: scl-dbgate
+    image: dbgate/dbgate:latest
+    restart: unless-stopped
+    ports:
+      - "8051:3000"
+    volumes:
+      - ./dbgate-data:/root/.dbgate
+    environment:
+      LOGIN: ${DBGATE_USER}
+      PASSWORD: ${DBGATE_PASSWORD}
+      CONNECTIONS: pg,mg
+      # PostgreSQL Connection
+      LABEL_pg: Space City Labs Postgres
+      SERVER_pg: felicity-postgres
+      USER_pg: ${POSTGRES_USER}
+      PASSWORD_pg: ${POSTGRES_PASSWORD}
+      DATABASE_pg: ${POSTGRES_DB}
+      PORT_pg: 5432
+      ENGINE_pg: postgres@dbgate-plugin-postgres
+      # MongoDB Connection
+      LABEL_mg: Space City Labs Mongo
+      URL_mg: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@felicity-mongo:27017/
+      DATABASE_mg: felicity
+      ENGINE_mg: mongo@dbgate-plugin-mongo
+    networks:
+      - felicitynet
+    depends_on:
+      felicity-postgres:
+        condition: service_healthy
+      felicity-mongo:
+        condition: service_healthy
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"

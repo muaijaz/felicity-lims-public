@@ -15,7 +15,7 @@ class SupervisorSystemUpgrade:
     def __init__(self):
         self.repo_path = Path("/path/to/felicity", )
         self.backup_dir = Path("/path/to/backups")
-        self.db_url = "postgresql://user:pass@localhost/felicity"
+        self.db_url = "postgresql://user:pass@localhost/felicity_lims"
         self.alembic_ini_path = "/path/to/alembic.ini"
         self._upgrade_lock = asyncio.Lock()
         self.supervisor = xmlrpc.client.ServerProxy("http://localhost:9001/RPC2")

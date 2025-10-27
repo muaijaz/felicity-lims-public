@@ -26,4 +26,15 @@ async def updates(response: Response) -> Any:
     Check is there are new updates to this version
     """
     response.headers["Cache-Control"] = f"max-age={int(_cache_duration.total_seconds())}"
-    return await felicity_version.check_github_version()
+    try:
+        return await felicity_version.check_github_version()
+    except Exception as e:
+        logger.warning(f"Version check failed: {str(e)}")
+        # Return graceful fallback instead of error
+        return {
+            "current_version": felicity_version.version,
+            "latest_version": felicity_version.version,
+            "update_available": False,
+            "message": "Version check unavailable",
+            "error": str(e) if logger.level == logging.DEBUG else None
+        }

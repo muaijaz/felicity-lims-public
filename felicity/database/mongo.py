@@ -24,7 +24,7 @@ class MongoCollection(StrEnum):
 
 class MongoService:
     def __init__(self) -> None:
-        self.db = client.felicity
+        self.db = client.felicity_lims
 
     async def create(
         self, collection_name: MongoCollection, data: dict

@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime, timedelta
 from typing import Dict
 
@@ -16,7 +17,7 @@ class FelicityVersion:
     _version = __version__
     _owner = "aurthurm"  # beak-insights
     _repo = "felicity-lims"
-    _pat = "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"
+    _pat = os.getenv("GITHUB_TOKEN", None)  # Optional GitHub token from environment
     _cache = {}
     _cache_duration = _cache_duration
     _last_check = None
@@ -28,7 +29,11 @@ class FelicityVersion:
 
     async def _fetch_github_version(self) -> Dict:
         url = f"https://api.github.com/repos/{self._owner}/{self._repo}/releases/latest"
-        headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"Bearer {self._pat}"}
+        headers = {"Accept": "application/vnd.github.v3+json"}
+
+        # Only add auth if token is available
+        if self._pat:
+            headers["Authorization"] = f"Bearer {self._pat}"
 
         async with httpx.AsyncClient() as client:
             try:
@@ -38,8 +43,10 @@ class FelicityVersion:
             except httpx.TimeoutException:
                 raise HTTPException(status_code=504, detail="GitHub API request timed out")
             except httpx.HTTPError as e:
-                if e.response.status_code == 403:
+                if e.response and e.response.status_code == 403:
                     raise HTTPException(status_code=429, detail="GitHub API rate limit exceeded")
+                if e.response and e.response.status_code == 401:
+                    raise HTTPException(status_code=503, detail="Version check unavailable (GitHub auth required)")
                 raise HTTPException(status_code=502, detail=f"GitHub API error: {str(e)}")
 
     async def check_github_version(self) -> Dict:
