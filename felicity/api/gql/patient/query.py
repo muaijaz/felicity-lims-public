@@ -4,15 +4,29 @@ import strawberry  # noqa
 from strawberry.permission import PermissionExtension
 
 from felicity.api.gql.patient.types import (
+    ClinicalDiagnosisType,
+    GuarantorType,
     IdentificationType,
+    InsuranceCompanyType,
+    InsuranceValidationType,
     PatientCursorPage,
     PatientEdge,
+    PatientInsuranceType,
+    PatientMedicalHistoryType,
     PatientType,
 )
 from felicity.api.gql.permissions import IsAuthenticated, HasPermission
 from felicity.api.gql.types import PageInfo
 from felicity.apps.guard import FAction, FObject
-from felicity.apps.patient.services import IdentificationService, PatientService
+from felicity.apps.patient.services import (
+    ClinicalDiagnosisService,
+    GuarantorService,
+    IdentificationService,
+    InsuranceCompanyService,
+    PatientInsuranceService,
+    PatientMedicalHistoryService,
+    PatientService,
+)
 
 
 @strawberry.type
@@ -112,3 +126,122 @@ class PatientQuery:
     )
     async def identification_by_uid(self, info, uid: str) -> IdentificationType:
         return await IdentificationService().get(uid=uid)
+
+    # Medical History Queries
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def patient_medical_history(
+        self, info, patient_uid: str
+    ) -> Optional[PatientMedicalHistoryType]:
+        return await PatientMedicalHistoryService().get_by_patient(patient_uid)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def active_medications(self, info, patient_uid: str) -> List[dict]:
+        return await PatientMedicalHistoryService().get_active_medications(patient_uid)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def verified_allergies(self, info, patient_uid: str) -> List[dict]:
+        return await PatientMedicalHistoryService().get_verified_allergies(patient_uid)
+
+    # Insurance Queries
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def patient_insurance(
+        self, info, patient_uid: str, active_only: bool = True
+    ) -> List[PatientInsuranceType]:
+        return await PatientInsuranceService().get_by_patient(patient_uid, active_only)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def primary_insurance(
+        self, info, patient_uid: str
+    ) -> Optional[PatientInsuranceType]:
+        return await PatientInsuranceService().get_primary_insurance(patient_uid)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def validate_insurance(
+        self, info, insurance_uid: str
+    ) -> InsuranceValidationType:
+        validation = await PatientInsuranceService().validate_insurance(insurance_uid)
+        return InsuranceValidationType(**validation)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def insurance_companies(
+        self, info, active_only: bool = True
+    ) -> List[InsuranceCompanyType]:
+        if active_only:
+            return await InsuranceCompanyService().get_active_companies()
+        return await InsuranceCompanyService().all()
+
+    # Guarantor Query
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def patient_guarantor(
+        self, info, patient_uid: str
+    ) -> Optional[GuarantorType]:
+        return await GuarantorService().get_by_patient(patient_uid)
+
+    # Diagnosis Queries
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def patient_diagnoses(
+        self, info, patient_uid: str, active_only: bool = True
+    ) -> List[ClinicalDiagnosisType]:
+        return await ClinicalDiagnosisService().get_by_patient(patient_uid, active_only)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def primary_diagnosis(
+        self, info, patient_uid: str
+    ) -> Optional[ClinicalDiagnosisType]:
+        return await ClinicalDiagnosisService().get_primary_diagnosis(patient_uid)
+
+    @strawberry.field(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.READ, FObject.PATIENT)]
+        )]
+    )
+    async def diagnosis_for_analysis_request(
+        self, info, analysis_request_uid: str
+    ) -> List[ClinicalDiagnosisType]:
+        return await ClinicalDiagnosisService().get_by_analysis_request(
+            analysis_request_uid
+        )

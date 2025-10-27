@@ -4,9 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from felicity.apps.abstract.repository import BaseRepository
 from felicity.apps.patient.entities import (
+    ClinicalDiagnosis,
+    Guarantor,
     Identification,
+    InsuranceCompany,
     Patient,
     PatientIdentification,
+    PatientInsurance,
+    PatientMedicalHistory,
 )
 from felicity.utils.encryption import encrypt_pii
 
@@ -288,3 +293,273 @@ class PatientIdentificationRepository(BaseRepository[PatientIdentification]):
             filter_kwargs["identification_uid"] = identification_uid
 
         return await self.get(session=session, **filter_kwargs)
+
+
+class PatientMedicalHistoryRepository(BaseRepository[PatientMedicalHistory]):
+    """Repository for patient medical history with JSONB array operations."""
+    
+    def __init__(self) -> None:
+        super().__init__(PatientMedicalHistory)
+    
+    async def get_by_patient_uid(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """Get medical history for a specific patient."""
+        return await self.get(patient_uid=patient_uid, session=session)
+    
+    async def add_chronic_condition(
+        self,
+        uid: str,
+        condition: dict,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """
+        Add a chronic condition to the patient's medical history.
+        
+        Args:
+            uid: Medical history UID
+            condition: Dict with keys: icd10_code, title, description, onset_date, status
+            session: Optional database session
+            
+        Returns:
+            Updated medical history
+        """
+        history = await self.get(uid=uid, session=session)
+        if not history:
+            return None
+        
+        if not history.chronic_conditions:
+            history.chronic_conditions = []
+        
+        history.chronic_conditions.append(condition)
+        return await self.update(uid, {"chronic_conditions": history.chronic_conditions}, session=session)
+    
+    async def remove_chronic_condition(
+        self,
+        uid: str,
+        index: int,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """Remove a chronic condition by index."""
+        history = await self.get(uid=uid, session=session)
+        if not history or not history.chronic_conditions:
+            return None
+        
+        if 0 <= index < len(history.chronic_conditions):
+            history.chronic_conditions.pop(index)
+            return await self.update(uid, {"chronic_conditions": history.chronic_conditions}, session=session)
+        
+        return history
+    
+    async def add_medication(
+        self,
+        uid: str,
+        medication: dict,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """
+        Add a medication to treatment history.
+        
+        Args:
+            uid: Medical history UID
+            medication: Dict with keys: drug, dosage, frequency, route, start_date, treatment_type
+            session: Optional database session
+            
+        Returns:
+            Updated medical history
+        """
+        history = await self.get(uid=uid, session=session)
+        if not history:
+            return None
+        
+        if not history.treatment_history:
+            history.treatment_history = []
+        
+        history.treatment_history.append(medication)
+        return await self.update(uid, {"treatment_history": history.treatment_history}, session=session)
+    
+    async def remove_medication(
+        self,
+        uid: str,
+        index: int,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """Remove a medication by index."""
+        history = await self.get(uid=uid, session=session)
+        if not history or not history.treatment_history:
+            return None
+        
+        if 0 <= index < len(history.treatment_history):
+            history.treatment_history.pop(index)
+            return await self.update(uid, {"treatment_history": history.treatment_history}, session=session)
+        
+        return history
+    
+    async def add_allergy(
+        self,
+        uid: str,
+        allergy: dict,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """
+        Add an allergy to the patient's medical history.
+        
+        Args:
+            uid: Medical history UID
+            allergy: Dict with keys: allergen, allergen_type, severity, reaction, verified
+            session: Optional database session
+            
+        Returns:
+            Updated medical history
+        """
+        history = await self.get(uid=uid, session=session)
+        if not history:
+            return None
+        
+        if not history.allergies:
+            history.allergies = []
+        
+        history.allergies.append(allergy)
+        return await self.update(uid, {"allergies": history.allergies}, session=session)
+    
+    async def remove_allergy(
+        self,
+        uid: str,
+        index: int,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """Remove an allergy by index."""
+        history = await self.get(uid=uid, session=session)
+        if not history or not history.allergies:
+            return None
+        
+        if 0 <= index < len(history.allergies):
+            history.allergies.pop(index)
+            return await self.update(uid, {"allergies": history.allergies}, session=session)
+        
+        return history
+
+
+class InsuranceCompanyRepository(BaseRepository[InsuranceCompany]):
+    """Repository for insurance companies."""
+    
+    def __init__(self) -> None:
+        super().__init__(InsuranceCompany)
+    
+    async def get_active_companies(
+        self,
+        session: Optional[AsyncSession] = None
+    ) -> List[InsuranceCompany]:
+        """Get all active insurance companies."""
+        return await self.get_all(is_active=True, session=session)
+    
+    async def find_by_code(
+        self,
+        code: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[InsuranceCompany]:
+        """Find insurance company by payer code."""
+        return await self.get(code=code, session=session)
+    
+    async def find_by_name(
+        self,
+        name: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[InsuranceCompany]:
+        """Find insurance company by name."""
+        return await self.get(name=name, session=session)
+
+
+class PatientInsuranceRepository(BaseRepository[PatientInsurance]):
+    """Repository for patient insurance policies."""
+    
+    def __init__(self) -> None:
+        super().__init__(PatientInsurance)
+    
+    async def get_by_patient_uid(
+        self,
+        patient_uid: str,
+        active_only: bool = True,
+        session: Optional[AsyncSession] = None
+    ) -> List[PatientInsurance]:
+        """Get all insurance policies for a patient."""
+        if active_only:
+            return await self.get_all(patient_uid=patient_uid, is_active=True, session=session)
+        return await self.get_all(patient_uid=patient_uid, session=session)
+    
+    async def get_primary_insurance(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientInsurance]:
+        """Get patient's primary insurance."""
+        return await self.get(patient_uid=patient_uid, priority="primary", is_active=True, session=session)
+    
+    async def get_by_priority(
+        self,
+        patient_uid: str,
+        priority: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientInsurance]:
+        """Get insurance by priority (primary, secondary, tertiary)."""
+        return await self.get(patient_uid=patient_uid, priority=priority, is_active=True, session=session)
+
+
+class GuarantorRepository(BaseRepository[Guarantor]):
+    """Repository for patient guarantors."""
+    
+    def __init__(self) -> None:
+        super().__init__(Guarantor)
+    
+    async def get_by_patient_uid(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[Guarantor]:
+        """Get guarantor for a specific patient."""
+        return await self.get(patient_uid=patient_uid, session=session)
+
+
+class ClinicalDiagnosisRepository(BaseRepository[ClinicalDiagnosis]):
+    """Repository for clinical diagnoses."""
+    
+    def __init__(self) -> None:
+        super().__init__(ClinicalDiagnosis)
+    
+    async def get_by_patient_uid(
+        self,
+        patient_uid: str,
+        active_only: bool = True,
+        session: Optional[AsyncSession] = None
+    ) -> List[ClinicalDiagnosis]:
+        """Get all diagnoses for a patient."""
+        if active_only:
+            return await self.get_all(patient_uid=patient_uid, status="active", session=session)
+        return await self.get_all(patient_uid=patient_uid, session=session)
+    
+    async def get_by_icd10_code(
+        self,
+        patient_uid: str,
+        icd10_code: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[ClinicalDiagnosis]:
+        """Find diagnosis by ICD-10 code for a patient."""
+        return await self.get(patient_uid=patient_uid, icd10_code=icd10_code, session=session)
+    
+    async def get_by_analysis_request(
+        self,
+        analysis_request_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> List[ClinicalDiagnosis]:
+        """Get diagnoses linked to a specific analysis request."""
+        return await self.get_all(analysis_request_uid=analysis_request_uid, session=session)
+    
+    async def get_primary_diagnosis(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[ClinicalDiagnosis]:
+        """Get patient's primary diagnosis."""
+        return await self.get(patient_uid=patient_uid, diagnosis_type="primary", status="active", session=session)

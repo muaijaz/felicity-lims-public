@@ -1,9 +1,22 @@
 from .types import (
+    AllergyType,
+    ChronicConditionType,
+    ClinicalDiagnosisType,
+    FamilyHistoryType,
+    GuarantorType,
     IdentificationType,
+    ImmunizationType,
+    InsuranceCompanyType,
+    InsuranceValidationType,
+    MedicationType,
     PatientCursorPage,
     PatientEdge,
     PatientIdentificationType,
+    PatientInsuranceType,
+    PatientMedicalHistoryType,
     PatientType,
+    SurgicalHistoryType,
+    TravelHistoryType,
 )
 
 patient_types = [
@@ -12,4 +25,19 @@ patient_types = [
     PatientType,
     PatientEdge,
     PatientCursorPage,
+    # Medical History Types
+    ChronicConditionType,
+    MedicationType,
+    AllergyType,
+    ImmunizationType,
+    TravelHistoryType,
+    FamilyHistoryType,
+    SurgicalHistoryType,
+    PatientMedicalHistoryType,
+    # Insurance Types
+    InsuranceCompanyType,
+    PatientInsuranceType,
+    GuarantorType,
+    ClinicalDiagnosisType,
+    InsuranceValidationType,
 ]

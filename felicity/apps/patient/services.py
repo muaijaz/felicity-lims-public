@@ -9,9 +9,14 @@ from felicity.apps.client.services import ClientService
 from felicity.apps.common.utils.serializer import marshaller
 from felicity.apps.idsequencer.service import IdSequenceService
 from felicity.apps.patient.entities import (
+    ClinicalDiagnosis,
+    Guarantor,
     Identification,
+    InsuranceCompany,
     Patient,
     PatientIdentification,
+    PatientInsurance,
+    PatientMedicalHistory,
 )
 from felicity.apps.patient.repository import (
     IdentificationRepository,
@@ -19,11 +24,21 @@ from felicity.apps.patient.repository import (
     PatientRepository,
 )
 from felicity.apps.patient.schemas import (
+    ClinicalDiagnosisCreate,
+    ClinicalDiagnosisUpdate,
+    GuarantorCreate,
+    GuarantorUpdate,
     IdentificationCreate,
     IdentificationUpdate,
+    InsuranceCompanyCreate,
+    InsuranceCompanyUpdate,
     PatientCreate,
     PatientIdentificationCreate,
     PatientIdentificationUpdate,
+    PatientInsuranceCreate,
+    PatientInsuranceUpdate,
+    PatientMedicalHistoryCreate,
+    PatientMedicalHistoryUpdate,
     PatientUpdate,
 )
 from felicity.database.paging import PageCursor, PageInfo, EdgeNode
@@ -462,3 +477,331 @@ class PatientService(BaseService[Patient, PatientCreate, PatientUpdate]):
                 if _field == "country":
                     metadata[_field] = patient.country.snapshot() if patient.country else None
         return await self.update(pt.uid, {"metadata_snapshot": marshaller(metadata, depth=3)})
+
+
+class PatientMedicalHistoryService(
+    BaseService[PatientMedicalHistory, PatientMedicalHistoryCreate, PatientMedicalHistoryUpdate]
+):
+    """Service for managing patient medical history."""
+    
+    def __init__(self):
+        from felicity.apps.patient.repository import PatientMedicalHistoryRepository
+        super().__init__(PatientMedicalHistoryRepository())
+    
+    async def get_by_patient(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientMedicalHistory]:
+        """Get medical history for a patient."""
+        return await self.repository.get_by_patient_uid(patient_uid, session=session)
+    
+    async def create_or_update(
+        self,
+        patient_uid: str,
+        data: dict,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Create medical history if it doesn't exist, otherwise update."""
+        existing = await self.get_by_patient(patient_uid, session=session)
+        if existing:
+            return await self.update(existing.uid, data, session=session)
+        data['patient_uid'] = patient_uid
+        return await self.create(data, session=session)
+    
+    async def add_chronic_condition(
+        self,
+        patient_uid: str,
+        condition: dict,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Add a chronic condition to patient's medical history."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            # Create medical history if it doesn't exist
+            history = await self.create({'patient_uid': patient_uid}, session=session)
+        
+        return await self.repository.add_chronic_condition(history.uid, condition, session=session)
+    
+    async def remove_chronic_condition(
+        self,
+        patient_uid: str,
+        index: int,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Remove a chronic condition by index."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            raise ValueError("Medical history not found for patient")
+        
+        return await self.repository.remove_chronic_condition(history.uid, index, session=session)
+    
+    async def add_medication(
+        self,
+        patient_uid: str,
+        medication: dict,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Add a medication to patient's treatment history."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            history = await self.create({'patient_uid': patient_uid}, session=session)
+        
+        return await self.repository.add_medication(history.uid, medication, session=session)
+    
+    async def remove_medication(
+        self,
+        patient_uid: str,
+        index: int,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Remove a medication by index."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            raise ValueError("Medical history not found for patient")
+        
+        return await self.repository.remove_medication(history.uid, index, session=session)
+    
+    async def add_allergy(
+        self,
+        patient_uid: str,
+        allergy: dict,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Add an allergy to patient's medical history."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            history = await self.create({'patient_uid': patient_uid}, session=session)
+        
+        return await self.repository.add_allergy(history.uid, allergy, session=session)
+    
+    async def remove_allergy(
+        self,
+        patient_uid: str,
+        index: int,
+        session: Optional[AsyncSession] = None
+    ) -> PatientMedicalHistory:
+        """Remove an allergy by index."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            raise ValueError("Medical history not found for patient")
+        
+        return await self.repository.remove_allergy(history.uid, index, session=session)
+    
+    async def get_active_medications(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> list:
+        """Get patient's active medications."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            return []
+        return history.active_medications
+    
+    async def get_verified_allergies(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> list:
+        """Get patient's verified allergies."""
+        history = await self.get_by_patient(patient_uid, session=session)
+        if not history:
+            return []
+        return history.verified_allergies
+
+
+class InsuranceCompanyService(
+    BaseService[InsuranceCompany, InsuranceCompanyCreate, InsuranceCompanyUpdate]
+):
+    """Service for managing insurance companies."""
+    
+    def __init__(self):
+        from felicity.apps.patient.repository import InsuranceCompanyRepository
+        super().__init__(InsuranceCompanyRepository())
+    
+    async def get_active_companies(
+        self,
+        session: Optional[AsyncSession] = None
+    ) -> List[InsuranceCompany]:
+        """Get all active insurance companies."""
+        return await self.repository.get_active_companies(session=session)
+    
+    async def find_by_code(
+        self,
+        code: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[InsuranceCompany]:
+        """Find insurance company by payer code."""
+        return await self.repository.find_by_code(code, session=session)
+    
+    async def find_by_name(
+        self,
+        name: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[InsuranceCompany]:
+        """Find insurance company by name."""
+        return await self.repository.find_by_name(name, session=session)
+
+
+class PatientInsuranceService(
+    BaseService[PatientInsurance, PatientInsuranceCreate, PatientInsuranceUpdate]
+):
+    """Service for managing patient insurance policies."""
+    
+    def __init__(self):
+        from felicity.apps.patient.repository import PatientInsuranceRepository
+        super().__init__(PatientInsuranceRepository())
+    
+    async def get_by_patient(
+        self,
+        patient_uid: str,
+        active_only: bool = True,
+        session: Optional[AsyncSession] = None
+    ) -> List[PatientInsurance]:
+        """Get all insurance policies for a patient."""
+        return await self.repository.get_by_patient_uid(patient_uid, active_only, session=session)
+    
+    async def get_primary_insurance(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientInsurance]:
+        """Get patient's primary insurance."""
+        return await self.repository.get_primary_insurance(patient_uid, session=session)
+    
+    async def get_by_priority(
+        self,
+        patient_uid: str,
+        priority: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[PatientInsurance]:
+        """Get insurance by priority (primary, secondary, tertiary)."""
+        return await self.repository.get_by_priority(patient_uid, priority, session=session)
+    
+    async def validate_insurance(
+        self,
+        insurance_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> dict:
+        """
+        Validate insurance policy and return status.
+        
+        Returns:
+            Dict with keys: is_valid, reason, coverage_active
+        """
+        insurance = await self.get(uid=insurance_uid, session=session)
+        if not insurance:
+            return {"is_valid": False, "reason": "Insurance not found", "coverage_active": False}
+        
+        if not insurance.is_active:
+            return {"is_valid": False, "reason": "Insurance policy is inactive", "coverage_active": False}
+        
+        if not insurance.is_valid:
+            return {"is_valid": False, "reason": "Insurance policy is expired or not yet effective", "coverage_active": False}
+        
+        return {"is_valid": True, "reason": "Insurance policy is valid", "coverage_active": True}
+
+
+class GuarantorService(
+    BaseService[Guarantor, GuarantorCreate, GuarantorUpdate]
+):
+    """Service for managing patient guarantors."""
+    
+    def __init__(self):
+        from felicity.apps.patient.repository import GuarantorRepository
+        super().__init__(GuarantorRepository())
+    
+    async def get_by_patient(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[Guarantor]:
+        """Get guarantor for a patient."""
+        return await self.repository.get_by_patient_uid(patient_uid, session=session)
+    
+    async def create_or_update(
+        self,
+        patient_uid: str,
+        data: dict,
+        session: Optional[AsyncSession] = None
+    ) -> Guarantor:
+        """Create guarantor if it doesn't exist, otherwise update."""
+        existing = await self.get_by_patient(patient_uid, session=session)
+        if existing:
+            return await self.update(existing.uid, data, session=session)
+        data['patient_uid'] = patient_uid
+        return await self.create(data, session=session)
+
+
+class ClinicalDiagnosisService(
+    BaseService[ClinicalDiagnosis, ClinicalDiagnosisCreate, ClinicalDiagnosisUpdate]
+):
+    """Service for managing clinical diagnoses."""
+    
+    def __init__(self):
+        from felicity.apps.patient.repository import ClinicalDiagnosisRepository
+        super().__init__(ClinicalDiagnosisRepository())
+    
+    async def get_by_patient(
+        self,
+        patient_uid: str,
+        active_only: bool = True,
+        session: Optional[AsyncSession] = None
+    ) -> List[ClinicalDiagnosis]:
+        """Get all diagnoses for a patient."""
+        return await self.repository.get_by_patient_uid(patient_uid, active_only, session=session)
+    
+    async def get_by_icd10_code(
+        self,
+        patient_uid: str,
+        icd10_code: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[ClinicalDiagnosis]:
+        """Find diagnosis by ICD-10 code for a patient."""
+        return await self.repository.get_by_icd10_code(patient_uid, icd10_code, session=session)
+    
+    async def get_by_analysis_request(
+        self,
+        analysis_request_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> List[ClinicalDiagnosis]:
+        """Get diagnoses linked to a specific analysis request."""
+        return await self.repository.get_by_analysis_request(analysis_request_uid, session=session)
+    
+    async def get_primary_diagnosis(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> Optional[ClinicalDiagnosis]:
+        """Get patient's primary diagnosis."""
+        return await self.repository.get_primary_diagnosis(patient_uid, session=session)
+    
+    async def assign_diagnosis_pointers(
+        self,
+        patient_uid: str,
+        session: Optional[AsyncSession] = None
+    ) -> List[ClinicalDiagnosis]:
+        """
+        Assign diagnosis pointers (A, B, C, D) for 837 claims.
+        Primary diagnosis gets 'A', others get B, C, D in order.
+        """
+        diagnoses = await self.get_by_patient(patient_uid, active_only=True, session=session)
+        
+        pointers = ['A', 'B', 'C', 'D']
+        
+        # Sort by diagnosis_type (primary first) and diagnosis_date
+        sorted_diagnoses = sorted(
+            diagnoses,
+            key=lambda d: (
+                0 if d.diagnosis_type == 'primary' else 1,
+                d.diagnosis_date
+            )
+        )
+        
+        # Assign pointers
+        for i, diagnosis in enumerate(sorted_diagnoses[:4]):  # Max 4 diagnosis pointers
+            if diagnosis.pointer != pointers[i]:
+                await self.update(diagnosis.uid, {"pointer": pointers[i]}, session=session)
+        
+        return await self.get_by_patient(patient_uid, active_only=True, session=session)

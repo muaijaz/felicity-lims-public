@@ -7,16 +7,29 @@ import strawberry  # noqa
 from strawberry.permission import PermissionExtension
 
 from felicity.api.gql.auth import auth_from_info
-from felicity.api.gql.patient.types import IdentificationType, PatientType
+from felicity.api.gql.patient.types import (
+    ClinicalDiagnosisType,
+    GuarantorType,
+    IdentificationType,
+    InsuranceCompanyType,
+    PatientInsuranceType,
+    PatientMedicalHistoryType,
+    PatientType,
+)
 from felicity.api.gql.permissions import IsAuthenticated, HasPermission
-from felicity.api.gql.types import OperationError
+from felicity.api.gql.types import OperationError, JSONScalar
 from felicity.api.gql.types.generic import StrawberryMapper
 from felicity.apps.client.services import ClientService
 from felicity.apps.guard import FAction, FObject
 from felicity.apps.patient import schemas
 from felicity.apps.patient.services import (
+    ClinicalDiagnosisService,
+    GuarantorService,
     IdentificationService,
+    InsuranceCompanyService,
     PatientIdentificationService,
+    PatientInsuranceService,
+    PatientMedicalHistoryService,
     PatientService,
 )
 
@@ -62,6 +75,176 @@ class PatientInputType:
 IdentificationResponse = strawberry.union(
     "IdentificationResponse",
     (IdentificationType, OperationError),  # noqa
+    description="",
+)
+
+
+# Medical History Input Types
+
+@strawberry.input
+class ChronicConditionInput:
+    icd10_code: str
+    title: str
+    description: str | None = None
+    onset_date: str | None = None
+    end_date: str | None = None
+    status: str = "active"
+
+
+@strawberry.input
+class MedicationInput:
+    drug: str
+    dosage: str | None = None
+    frequency: str | None = None
+    route: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    treatment_type: str | None = None
+    prescribing_provider: str | None = None
+    status: str = "active"
+
+
+@strawberry.input
+class AllergyInput:
+    allergen: str
+    allergen_type: str | None = None
+    severity: str | None = None
+    reaction: str | None = None
+    onset_date: str | None = None
+    verified: bool = False
+    notes: str | None = None
+
+
+@strawberry.input
+class PatientMedicalHistoryInput:
+    patient_uid: str
+    menstrual_status: str | None = None
+    pregnancy_status: bool | None = None
+    pregnancy_due_date: str | None = None
+    smoking_status: str | None = None
+    alcohol_use: str | None = None
+    drug_use: str | None = None
+    occupation: str | None = None
+    notes: str | None = None
+
+
+PatientMedicalHistoryResponse = strawberry.union(
+    "PatientMedicalHistoryResponse",
+    (PatientMedicalHistoryType, OperationError),
+    description="",
+)
+
+
+# Insurance Input Types
+
+@strawberry.input
+class InsuranceCompanyInput:
+    name: str
+    code: str | None = None
+    address_line1: str | None = None
+    address_line2: str | None = None
+    city: str | None = None
+    state: str | None = None
+    zip_code: str | None = None
+    country: str | None = None
+    phone: str | None = None
+    fax: str | None = None
+    email: str | None = None
+    website: str | None = None
+    claims_address: str | None = None
+    electronic_payer_id: str | None = None
+    clearinghouse: str | None = None
+    fhir_endpoint: str | None = None
+    api_credentials: JSONScalar | None = None
+    is_active: bool = True
+
+
+InsuranceCompanyResponse = strawberry.union(
+    "InsuranceCompanyResponse",
+    (InsuranceCompanyType, OperationError),
+    description="",
+)
+
+
+@strawberry.input
+class PatientInsuranceInput:
+    patient_uid: str
+    priority: str
+    insurance_company_uid: str
+    policy_number: str
+    group_number: str | None = None
+    plan_name: str | None = None
+    subscriber_is_patient: bool = True
+    subscriber_first_name: str | None = None
+    subscriber_last_name: str | None = None
+    subscriber_dob: str | None = None
+    subscriber_gender: str | None = None
+    subscriber_id: str | None = None
+    relationship_to_patient: str | None = None
+    effective_date: datetime | None = None
+    termination_date: datetime | None = None
+    copay_amount: float | None = None
+    deductible_amount: float | None = None
+    invoice_to_insurance: bool = True
+    requires_authorization: bool = False
+    authorization_number: str | None = None
+    is_active: bool = True
+
+
+PatientInsuranceResponse = strawberry.union(
+    "PatientInsuranceResponse",
+    (PatientInsuranceType, OperationError),
+    description="",
+)
+
+
+@strawberry.input
+class GuarantorInput:
+    patient_uid: str
+    is_patient: bool = True
+    guarantor_id: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    date_of_birth: str | None = None
+    gender: str | None = None
+    relationship_to_patient: str | None = None
+    address_line1: str | None = None
+    address_line2: str | None = None
+    city: str | None = None
+    state: str | None = None
+    zip_code: str | None = None
+    phone_home: str | None = None
+    phone_business: str | None = None
+    phone_mobile: str | None = None
+    email: str | None = None
+    responsibility_percentage: int = 100
+
+
+GuarantorResponse = strawberry.union(
+    "GuarantorResponse",
+    (GuarantorType, OperationError),
+    description="",
+)
+
+
+@strawberry.input
+class ClinicalDiagnosisInput:
+    patient_uid: str
+    icd10_code: str
+    icd10_description: str
+    diagnosis_date: datetime
+    diagnosis_type: str
+    status: str = "active"
+    analysis_request_uid: str | None = None
+    resolution_date: datetime | None = None
+    diagnosing_provider_uid: str | None = None
+    notes: str | None = None
+    pointer: str | None = None
+
+
+ClinicalDiagnosisResponse = strawberry.union(
+    "ClinicalDiagnosisResponse",
+    (ClinicalDiagnosisType, OperationError),
     description="",
 )
 
@@ -250,3 +433,288 @@ class PatientMutations:
 
         patient = await PatientService().get(uid=patient.uid)
         return PatientType(**patient.marshal_simple())
+
+    # Medical History Mutations
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.CREATE, FObject.PATIENT)]
+        )]
+    )
+    async def create_or_update_medical_history(
+        self, info, payload: PatientMedicalHistoryInput
+    ) -> PatientMedicalHistoryResponse:
+        felicity_user = await auth_from_info(info)
+
+        incoming = payload.__dict__.copy()
+        incoming["created_by_uid"] = felicity_user.uid
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.PatientMedicalHistoryCreate(**incoming)
+        medical_history = await PatientMedicalHistoryService().create_or_update(
+            payload.patient_uid, obj_in
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def add_chronic_condition(
+        self, info, patient_uid: str, condition: ChronicConditionInput
+    ) -> PatientMedicalHistoryResponse:
+        await auth_from_info(info)
+        medical_history = await PatientMedicalHistoryService().add_chronic_condition(
+            patient_uid, condition.__dict__
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def remove_chronic_condition(
+        self, info, patient_uid: str, index: int
+    ) -> PatientMedicalHistoryResponse:
+        await auth_from_info(info)
+        medical_history = await PatientMedicalHistoryService().remove_chronic_condition(
+            patient_uid, index
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def add_medication(
+        self, info, patient_uid: str, medication: MedicationInput
+    ) -> PatientMedicalHistoryResponse:
+        await auth_from_info(info)
+        medical_history = await PatientMedicalHistoryService().add_medication(
+            patient_uid, medication.__dict__
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def remove_medication(
+        self, info, patient_uid: str, index: int
+    ) -> PatientMedicalHistoryResponse:
+        await auth_from_info(info)
+        medical_history = await PatientMedicalHistoryService().remove_medication(
+            patient_uid, index
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def add_allergy(
+        self, info, patient_uid: str, allergy: AllergyInput
+    ) -> PatientMedicalHistoryResponse:
+        await auth_from_info(info)
+        medical_history = await PatientMedicalHistoryService().add_allergy(
+            patient_uid, allergy.__dict__
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def remove_allergy(
+        self, info, patient_uid: str, index: int
+    ) -> PatientMedicalHistoryResponse:
+        await auth_from_info(info)
+        medical_history = await PatientMedicalHistoryService().remove_allergy(
+            patient_uid, index
+        )
+        return PatientMedicalHistoryType(**medical_history.marshal_simple())
+
+    # Insurance Mutations
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.CREATE, FObject.PATIENT)]
+        )]
+    )
+    async def create_insurance_company(
+        self, info, payload: InsuranceCompanyInput
+    ) -> InsuranceCompanyResponse:
+        felicity_user = await auth_from_info(info)
+
+        exists = await InsuranceCompanyService().get(name=payload.name)
+        if exists:
+            return OperationError(error=f"Insurance company {payload.name} already exists")
+
+        incoming = payload.__dict__.copy()
+        incoming["created_by_uid"] = felicity_user.uid
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.InsuranceCompanyCreate(**incoming)
+        insurance_company = await InsuranceCompanyService().create(obj_in)
+        return InsuranceCompanyType(**insurance_company.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def update_insurance_company(
+        self, info, uid: str, payload: InsuranceCompanyInput
+    ) -> InsuranceCompanyResponse:
+        felicity_user = await auth_from_info(info)
+
+        insurance_company = await InsuranceCompanyService().get(uid=uid)
+        if not insurance_company:
+            return OperationError(error=f"Insurance company with uid {uid} not found")
+
+        incoming = payload.__dict__.copy()
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.InsuranceCompanyUpdate(**incoming)
+        insurance_company = await InsuranceCompanyService().update(uid, obj_in)
+        return InsuranceCompanyType(**insurance_company.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.CREATE, FObject.PATIENT)]
+        )]
+    )
+    async def create_patient_insurance(
+        self, info, payload: PatientInsuranceInput
+    ) -> PatientInsuranceResponse:
+        felicity_user = await auth_from_info(info)
+
+        incoming = payload.__dict__.copy()
+        incoming["created_by_uid"] = felicity_user.uid
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.PatientInsuranceCreate(**incoming)
+        patient_insurance = await PatientInsuranceService().create(obj_in)
+        return PatientInsuranceType(**patient_insurance.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def update_patient_insurance(
+        self, info, uid: str, payload: PatientInsuranceInput
+    ) -> PatientInsuranceResponse:
+        felicity_user = await auth_from_info(info)
+
+        patient_insurance = await PatientInsuranceService().get(uid=uid)
+        if not patient_insurance:
+            return OperationError(error=f"Patient insurance with uid {uid} not found")
+
+        incoming = payload.__dict__.copy()
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.PatientInsuranceUpdate(**incoming)
+        patient_insurance = await PatientInsuranceService().update(uid, obj_in)
+        return PatientInsuranceType(**patient_insurance.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.DELETE, FObject.PATIENT)]
+        )]
+    )
+    async def delete_patient_insurance(self, info, uid: str) -> bool:
+        await auth_from_info(info)
+        await PatientInsuranceService().delete(uid)
+        return True
+
+    # Guarantor Mutations
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.CREATE, FObject.PATIENT)]
+        )]
+    )
+    async def create_or_update_guarantor(
+        self, info, payload: GuarantorInput
+    ) -> GuarantorResponse:
+        felicity_user = await auth_from_info(info)
+
+        incoming = payload.__dict__.copy()
+        incoming["created_by_uid"] = felicity_user.uid
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.GuarantorCreate(**incoming)
+        guarantor = await GuarantorService().create_or_update(
+            payload.patient_uid, obj_in
+        )
+        return GuarantorType(**guarantor.marshal_simple())
+
+    # Diagnosis Mutations
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.CREATE, FObject.PATIENT)]
+        )]
+    )
+    async def create_clinical_diagnosis(
+        self, info, payload: ClinicalDiagnosisInput
+    ) -> ClinicalDiagnosisResponse:
+        felicity_user = await auth_from_info(info)
+
+        incoming = payload.__dict__.copy()
+        incoming["created_by_uid"] = felicity_user.uid
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.ClinicalDiagnosisCreate(**incoming)
+        diagnosis = await ClinicalDiagnosisService().create(obj_in)
+        return ClinicalDiagnosisType(**diagnosis.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def update_clinical_diagnosis(
+        self, info, uid: str, payload: ClinicalDiagnosisInput
+    ) -> ClinicalDiagnosisResponse:
+        felicity_user = await auth_from_info(info)
+
+        diagnosis = await ClinicalDiagnosisService().get(uid=uid)
+        if not diagnosis:
+            return OperationError(error=f"Clinical diagnosis with uid {uid} not found")
+
+        incoming = payload.__dict__.copy()
+        incoming["updated_by_uid"] = felicity_user.uid
+
+        obj_in = schemas.ClinicalDiagnosisUpdate(**incoming)
+        diagnosis = await ClinicalDiagnosisService().update(uid, obj_in)
+        return ClinicalDiagnosisType(**diagnosis.marshal_simple())
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.DELETE, FObject.PATIENT)]
+        )]
+    )
+    async def delete_clinical_diagnosis(self, info, uid: str) -> bool:
+        await auth_from_info(info)
+        await ClinicalDiagnosisService().delete(uid)
+        return True
+
+    @strawberry.mutation(
+        extensions=[PermissionExtension(
+            permissions=[IsAuthenticated(), HasPermission(FAction.UPDATE, FObject.PATIENT)]
+        )]
+    )
+    async def assign_diagnosis_pointers(
+        self, info, patient_uid: str
+    ) -> List[ClinicalDiagnosisType]:
+        await auth_from_info(info)
+        diagnoses = await ClinicalDiagnosisService().assign_diagnosis_pointers(patient_uid)
+        return [ClinicalDiagnosisType(**d.marshal_simple()) for d in diagnoses]
