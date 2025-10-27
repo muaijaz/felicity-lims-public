@@ -35,7 +35,8 @@ services:
     ports:
       - "3000:3000" # Expose webapp on host port 3000
     depends_on:
-      - felicity-api # Webapp depends on the API
+      felicity-api:
+        condition: service_started # API doesn't have healthcheck, just wait for start
     networks:
       - felicitynet
     deploy:
@@ -95,11 +96,15 @@ services:
     ports:
       - 8000:8000 # Expose API on host port 8000
     depends_on:
-      # Ensure all backend services are running before the API starts
-      - felicity-postgres
-      - felicity-dragonfly
-      - felicity-minio
-      - felicity-mongo
+      # Wait for backend services to be healthy before starting API
+      felicity-postgres:
+        condition: service_healthy
+      felicity-dragonfly:
+        condition: service_healthy
+      felicity-minio:
+        condition: service_healthy
+      felicity-mongo:
+        condition: service_healthy
     networks:
       - felicitynet
     # extra_hosts is not needed for inter-container communication in a fully containerized setup
@@ -126,9 +131,10 @@ services:
     command: server /data --console-address ":9001" # Start MinIO server with console
     healthcheck: # Health check for MinIO
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 5s
+      interval: 60s           # Reduced frequency for development
+      timeout: 3s
       retries: 3
+      start_period: 10s       # Allow time to start
 
   felicity-dragonfly:
     container_name: felicity-dragonfly
@@ -156,10 +162,11 @@ services:
     networks:
       - felicitynet
     healthcheck: # Health check for DragonflyDB
-      test: ["CMD-SHELL", "dragonfly-cmd ping"] # Assuming dragonfly-cmd is available in the image
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "dragonfly-cmd ping"]
+      interval: 30s           # Reduced frequency for development
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
   felicity-postgres:
     container_name: felicity-postgres
@@ -182,7 +189,9 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust # Acceptable for development
     volumes:
       - ./services/postgres/init/:/docker-entrypoint-initdb.d/ # Init scripts
+      - ./services/postgres/postgresql-arm64.conf:/etc/postgresql/postgresql.conf:ro # ARM64 optimized config
       - postgres_data:/var/lib/postgresql/data # Persist PostgreSQL data to a named volume (standardized name)
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     ports:
       - 5434:5432 # Expose PostgreSQL on host port 5434 (internal 5432)
     # extra_hosts is not needed for inter-container communication in a fully containerized setup
@@ -190,10 +199,11 @@ services:
     networks:
       - felicitynet
     healthcheck: # Health check to ensure PostgreSQL is ready
-      test: ["CMD-SHELL", "pg_isready -U felicity"] # Using hardcoded user for dev
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U felicity"]
+      interval: 30s           # Reduced frequency for development
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   felicity-mongo:
     container_name: felicity-mongo
@@ -221,9 +231,10 @@ services:
       - felicitynet
     healthcheck: # Health check for MongoDB
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 30s           # Reduced frequency for development
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   felicity-dbgate:
     container_name: felicity-dbgate
