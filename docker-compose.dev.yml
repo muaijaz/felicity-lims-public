@@ -38,6 +38,14 @@ services:
       - felicity-api # Webapp depends on the API
     networks:
       - felicitynet
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     command: bash -c "pnpm webapp:dev --host --port 3000" # Development command for webapp
 
   felicity-api:
@@ -47,6 +55,14 @@ services:
       context: ./
       target: webapi
       dockerfile: Dockerfile.dev
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
     env_file:
       - .env
     environment:
@@ -92,8 +108,9 @@ services:
 
   felicity-minio:
     container_name: felicity-minio
-    image: minio/minio:latest # Official MinIO image for ARM compatibility
+    image: minio/minio:RELEASE2024-10-13T13-34-11Z # Pinned ARM64-native version
     restart: unless-stopped # Ensure MinIO restarts if it crashes
+    platform: linux/arm64 # Explicit ARM64 platform for Apple Silicon
     ports:
       - '9000:9000' # Expose MinIO API on host port 9000
       - '9001:9001' # Expose MinIO Console on host port 9001
@@ -115,11 +132,21 @@ services:
 
   felicity-dragonfly:
     container_name: felicity-dragonfly
-    image: 'docker.dragonflydb.io/dragonflydb/dragonfly:latest' # Pinning image version
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly:v1.23.1' # ARM64-native version
     restart: unless-stopped
+    platform: linux/arm64 # Explicit ARM64 platform for Apple Silicon
     environment:
-      - DFLY_proactor_threads=4 # Configure DragonflyDB threads
-      - DFLY_maxmemory=1G      # Set max memory for DragonflyDB
+      # Apple Silicon M2/M3/M4 optimized: Use 8-10 threads for performance cores
+      - DFLY_proactor_threads=8 # Optimized for Apple Silicon 8+ performance cores
+      - DFLY_maxmemory=2G      # Increased memory for Apple Silicon (2GB limit)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     ulimits:
       memlock: -1 # Allow memory locking for performance
     ports:
@@ -136,8 +163,17 @@ services:
 
   felicity-postgres:
     container_name: felicity-postgres
-    image: postgres:12.18 # Pinning a specific PostgreSQL 12 version for stability
+    image: postgres:16.4-alpine # ARM64-optimized Alpine version with latest features
     restart: unless-stopped
+    platform: linux/arm64 # Explicit ARM64 platform for Apple Silicon
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     environment:
       # PostgreSQL database credentials (hardcoded for dev, consider .env for consistency)
       POSTGRES_DB: felicity_lims
@@ -161,9 +197,18 @@ services:
 
   felicity-mongo:
     container_name: felicity-mongo
-    image: mongo:7.0.9 # Pinning a specific MongoDB version for stability
+    image: mongo:7.0.14 # Latest ARM64-native MongoDB 7.0 version
     restart: unless-stopped # Ensure MongoDB restarts if it crashes (changed from always to unless-stopped)
+    platform: linux/arm64 # Explicit ARM64 platform for Apple Silicon
     command: ["mongod", "--quiet", "--logpath", "/dev/null"]
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     environment:
       # MongoDB root credentials (hardcoded for dev, consider .env for consistency)
       MONGO_INITDB_ROOT_USERNAME: felicity
@@ -182,8 +227,9 @@ services:
 
   felicity-dbgate:
     container_name: felicity-dbgate
-    image: dbgate/dbgate:latest # Using latest version for ARM compatibility
+    image: dbgate/dbgate:5.3.4 # Pinned ARM64-native version
     restart: always
+    platform: linux/arm64 # Explicit ARM64 platform for Apple Silicon
     ports:
       - 8051:3000 # Expose DbGate on host port 8051
     volumes:

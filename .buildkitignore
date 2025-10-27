@@ -1,0 +1,62 @@
+# BuildKit-specific ignore file for optimized builds
+# This helps BuildKit create better layer caches
+
+# Git and version control
+.git
+.gitignore
+
+# Documentation (not needed in build context)
+*.md
+docs/
+claudedocs/
+
+# Docker files (not needed inside image)
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node modules (handled by package.json)
+node_modules/
+
+# Environment files
+.env
+.env.*
+
+# Logs and databases
+*.log
+*.db
+*.sqlite
+
+# Media and uploads
+media/
+uploads/
+
+# Test files
+tests/
+test_*.py
+*_test.py

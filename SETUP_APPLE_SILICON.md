@@ -263,11 +263,23 @@ docker exec -it felicity-mongo mongosh -u felicity -p felicity
 2. **Some Python packages**: May build from source (slower first build)
 3. **QEMU emulation**: Not needed - all images are ARM64 native
 
+## Performance Optimizations
+
+This fork includes extensive Apple Silicon optimizations. For detailed information, see:
+- **[APPLE_SILICON_OPTIMIZATIONS.md](APPLE_SILICON_OPTIMIZATIONS.md)** - Comprehensive performance guide
+
+**Quick Performance Tips**:
+- Enable BuildKit: `export DOCKER_BUILDKIT=1`
+- Use warm cache: 2-3x faster rebuilds
+- All images are ARM64-native (no emulation)
+- Resource limits tuned for M2/M3/M4 performance cores
+
 ## Additional Resources
 
 - [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
 - [Apple Silicon Docker Performance](https://docs.docker.com/desktop/mac/apple-silicon/)
 - [Felicity LIMS Documentation](docs/)
+- [Apple Silicon Optimizations Guide](APPLE_SILICON_OPTIMIZATIONS.md)
 
 ## Contributing
 

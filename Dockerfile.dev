@@ -1,11 +1,14 @@
-FROM node:18.16.0-alpine AS webapp
+# syntax=docker/dockerfile:1.4
+FROM node:18.20.4-alpine AS webapp
 RUN apk update && apk add bash
 RUN npm i -g pnpm
 RUN mkdir -p /app
 WORKDIR /app
 COPY ./package.json /app
 COPY ./pnpm-lock.yaml /app
-RUN pnpm install
+# Use BuildKit cache mount for faster pnpm installs
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install
 COPY ./webapp /app/webapp
 COPY ./index.html /app
 COPY ./public /app/public
@@ -16,8 +19,11 @@ FROM tiangolo/uvicorn-gunicorn:python3.11 AS webapi
 LABEL maintainer="Sebastian Ramirez <tiangolo@gmail.com>"
 RUN apt-get update && apt-get install -y git libpq-dev gcc
 COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
+# Use BuildKit cache mount for pip packages (massive speedup on Apple Silicon)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade -r /tmp/requirements.txt
 WORKDIR /app
 COPY . /app
-RUN pip install -e .
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -e .
 ENV PYTHONPATH=/app
